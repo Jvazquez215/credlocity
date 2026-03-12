@@ -1,0 +1,328 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import RichTextEditor from '../../../components/RichTextEditor';
+import api from '../../../utils/api';
+import ImageUpload from '../../../components/ui/ImageUpload';
+import SchemaSelector from '../../../components/ui/SchemaSelector';
+import { Image, Code } from 'lucide-react';
+
+const EditPage = () => {
+  const navigate = useNavigate();
+  const { pageId } = useParams();
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    content: '',
+    featured_image_url: '',
+    featured_image_alt: '',
+    meta_title: '',
+    meta_description: '',
+    og_title: '',
+    og_description: '',
+    og_image: '',
+    schema_types: [],
+    status: 'draft'
+  });
+  const [showSEO, setShowSEO] = useState(false);
+  const [showSchemas, setShowSchemas] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(true);
+
+  useEffect(() => {
+    fetchPage();
+  }, [pageId]);
+
+  const fetchPage = async () => {
+    try {
+      console.log('Fetching page with ID:', pageId);
+      const response = await api.get(`/pages/${pageId}`);
+      console.log('Page data received:', response.data);
+      setFormData(response.data);
+      setLoadingPage(false);
+    } catch (err) {
+      console.error('Failed to load page:', err);
+      setError('Failed to load page: ' + (err.response?.data?.detail || err.message));
+      setLoadingPage(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      await api.put(`/pages/${pageId}`, formData);
+      setSuccess('Page updated successfully!');
+      setTimeout(() => {
+        navigate('/admin/dashboard/pages');
+      }, 1000);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to update page');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loadingPage) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-gray-600">Loading page...</div>
+      </div>
+    );
+  }
+
+  if (error && !formData.title) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+          {error}
+        </div>
+        <button
+          onClick={() => navigate('/admin/dashboard/pages')}
+          className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+        >
+          ← Back to Pages
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Edit Page</h1>
+        <p className="text-gray-600 mt-2">Update page content and settings</p>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded mb-4">
+          {success}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Title */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Page Title <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        {/* URL Slug */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            URL Slug <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={formData.slug}
+            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <p className="text-sm text-gray-500 mt-1">
+            URL: www.credlocity.com/{formData.slug || 'page-url-slug'}
+          </p>
+        </div>
+
+        {/* Content Editor */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Page Content <span className="text-red-500">*</span>
+          </label>
+          <RichTextEditor
+            content={formData.content}
+            onChange={(html) => setFormData({ ...formData, content: html })}
+          />
+        </div>
+
+        {/* Featured Image */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Image className="inline w-4 h-4 mr-2" />
+            Featured Image
+          </label>
+          <ImageUpload
+            value={formData.featured_image_url}
+            onChange={(url) => setFormData({ ...formData, featured_image_url: url })}
+            label="Upload or enter image URL"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Featured Image Alt Text</label>
+          <input
+            type="text"
+            value={formData.featured_image_alt || ''}
+            onChange={(e) => setFormData({ ...formData, featured_image_alt: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Descriptive alt text for accessibility and SEO"
+          />
+        </div>
+
+        {/* Schema Selector */}
+        <div className="border border-gray-200 rounded-lg">
+          <button
+            type="button"
+            onClick={() => setShowSchemas(!showSchemas)}
+            className="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Code className="w-5 h-5 text-gray-700" />
+              <span className="font-medium text-gray-900">📊 Schema.org Structured Data</span>
+            </div>
+            <span>{showSchemas ? '▼' : '▶'}</span>
+          </button>
+
+          {showSchemas && (
+            <div className="p-4 bg-white">
+              <SchemaSelector
+                value={formData.schema_types}
+                onChange={(schemas) => setFormData({ ...formData, schema_types: schemas })}
+                contentType="page"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Status */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Status
+          </label>
+          <select
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+
+        {/* SEO Settings */}
+        <div className="border border-gray-200 rounded-lg">
+          <button
+            type="button"
+            onClick={() => setShowSEO(!showSEO)}
+            className="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <span className="font-medium text-gray-900">🔍 SEO Settings</span>
+            <span>{showSEO ? '▼' : '▶'}</span>
+          </button>
+
+          {showSEO && (
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Meta Title ({(formData.meta_title || '').length}/60 characters)
+                </label>
+                <input
+                  type="text"
+                  value={formData.meta_title || ''}
+                  onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })}
+                  maxLength={60}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="SEO title for search engines"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Meta Description ({(formData.meta_description || '').length}/160 characters)
+                </label>
+                <textarea
+                  value={formData.meta_description || ''}
+                  onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
+                  maxLength={160}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Brief description for search results"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  OG Title (Social Media)
+                </label>
+                <input
+                  type="text"
+                  value={formData.og_title || ''}
+                  onChange={(e) => setFormData({ ...formData, og_title: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Title for social media shares"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  OG Description (Social Media)
+                </label>
+                <textarea
+                  value={formData.og_description || ''}
+                  onChange={(e) => setFormData({ ...formData, og_description: e.target.value })}
+                  rows={2}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Description for social media shares"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  OG Image URL (Social Media)
+                </label>
+                <input
+                  type="url"
+                  value={formData.og_image || formData.featured_image_url || ''}
+                  onChange={(e) => setFormData({ ...formData, og_image: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Leave blank to use featured image"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Recommended size: 1200x630px. Defaults to featured image if blank.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-4 pt-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          >
+            {loading ? 'Updating...' : 'Update Page'}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/admin/dashboard/pages')}
+            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default EditPage;

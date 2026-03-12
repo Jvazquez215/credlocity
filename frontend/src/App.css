@@ -1,0 +1,41 @@
+/* Global App Styles */
+.App {
+  min-height: 100vh;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #012697 0%, #59a52c 100%);
+}
+
+.bg-gradient-secondary {
+  background: linear-gradient(to bottom right, #0133ca, #6fca3a);
+}
+
+.bg-gradient-dark {
+  background: linear-gradient(135deg, #011964 0%, #012697 100%);
+}
+
+/* Smooth transitions for buttons */
+button {
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Smooth link transitions */
+a {
+  transition: color 0.2s ease;
+}

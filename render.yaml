@@ -1,0 +1,30 @@
+services:
+  # Backend API
+  - type: web
+    name: credlocity-api
+    runtime: python
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MONGO_URL
+        sync: false
+      - key: DB_NAME
+        value: credlocity
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+  
+  # Frontend Website
+  - type: web
+    name: credlocity-website
+    runtime: static
+    buildCommand: cd frontend && npm install --legacy-peer-deps && npm run build
+    staticPublishPath: frontend/build
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        sync: false

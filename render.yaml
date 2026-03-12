@@ -4,19 +4,18 @@ services:
     runtime: python
     region: oregon
     plan: free
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT
+    rootDir: backend
+    buildCommand: pip install fastapi uvicorn motor pymongo pydantic python-jose passlib bcrypt python-dotenv python-multipart pillow reportlab stripe starlette cryptography httpx Jinja2
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: MONGO_URL
-        value: mongodb+srv://credlocity:Credlocity2024@cluster0.mongodb.net/?retryWrites=true&w=majority
+        value: mongodb+srv://claw-setup-4bx5n:d6pevp4lqs2c73eepqh0@customer-apps.vur8w0.mongodb.net/?retryWrites=true&w=majority
       - key: DB_NAME
-        value: credlocity
+        value: claw-setup-4bx5n-test_database
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
         generateValue: true
-      - key: PYTHON_VERSION
-        value: 3.11.7
 
   - type: web
     name: credlocity-website

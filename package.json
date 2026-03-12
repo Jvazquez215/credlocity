@@ -1,0 +1,11 @@
+{
+  "name": "credlocity",
+  "version": "1.0.0",
+  "description": "Credlocity - Credit Repair Services Platform",
+  "scripts": {
+    "install-frontend": "cd frontend && npm install --legacy-peer-deps",
+    "build-frontend": "cd frontend && npm run build",
+    "start-backend": "cd backend && python server.py",
+    "install-backend": "cd backend && pip install -r requirements.txt"
+  }
+}

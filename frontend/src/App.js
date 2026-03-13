@@ -103,7 +103,7 @@ function App() {
       <TranslationProvider>
       <AuthProvider>
         <PermissionsProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/credlocity-website">
           <ScrollToTop />
           <ActivityTrackerProvider>
             <div className="App">

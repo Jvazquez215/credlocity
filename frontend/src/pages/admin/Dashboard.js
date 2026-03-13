@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { usePermissions } from '../../context/PermissionsContext';
 import { Button } from '../../components/ui/button';
 import { 
   FileText, Star, MessageSquare, Image, AlertCircle, LogOut, LayoutDashboard, 
   Users, ExternalLink, ChevronDown, ChevronRight, Scale, Newspaper, Settings,
   Building2, Receipt, ClipboardList, HelpCircle, Megaphone, FolderOpen, Calendar,
   Phone, DollarSign, AlertTriangle, Plus, CheckCircle, CheckCircle2, Gavel, Link2,
-  BarChart3, Globe, Award, Shield, MessageCircle, Headphones
+  BarChart3, Globe, Award, Shield, MessageCircle, Headphones, GraduationCap,
+  Briefcase, CreditCard, TrendingUp, Wallet, UserCog, BookOpen
 } from 'lucide-react';
-import DashboardHome from './DashboardHome';
+import SmartDashboard from './SmartDashboard';
+import { useTranslation } from '../../context/TranslationContext';
 import PagesList from './pages/PagesList';
 import CreatePage from './pages/CreatePage';
 import EditPage from './pages/EditPage';
@@ -117,51 +120,82 @@ import SecurityDashboard from './security/SecurityDashboard';
 // Chat Systems
 import InternalChat from './chat/InternalChat';
 import SupportChatDashboard from './support-chat/SupportChatDashboard';
+import CMSChatBubble from '../../components/chat/CMSChatBubble';
 
-// Collapsible Menu Section Component
-const MenuSection = ({ title, icon: Icon, children, defaultOpen = false }) => {
+// Training & Policies
+import TrainingCenter from './training/TrainingCenter';
+
+// Payroll
+import PayrollDashboard from './payroll/PayrollDashboard';
+
+// Documentation
+import DocumentCenter from './documentation/DocumentCenter';
+
+// Collections Commission Settings
+import CollectionsCommissionSettings from './collections/CollectionsCommissionSettings';
+
+// Commission Dashboard
+import CommissionDashboard from './collections/CommissionDashboard';
+
+// Permissions Manager
+import PermissionsManager from './PermissionsManager';
+
+// Collapsible Menu Section Component with permission gating
+const MenuSection = ({ title, icon: Icon, children, defaultOpen = false, perm }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const { hasPerm, hasAnyPerm } = usePermissions();
+  
+  // If perm is specified as array, check if user has any of those perms
+  if (perm) {
+    const perms = Array.isArray(perm) ? perm : [perm];
+    if (!hasAnyPerm(perms)) return null;
+  }
   
   return (
     <div className="mb-1">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition"
+        className="w-full flex items-center justify-between px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition"
       >
         <div className="flex items-center gap-2">
           {Icon && <Icon className="w-4 h-4" />}
-          <span className="text-xs font-semibold uppercase tracking-wider">{title}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider">{title}</span>
         </div>
-        {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+        {isOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
       </button>
-      {isOpen && <div className="mt-1 space-y-1">{children}</div>}
+      {isOpen && <div className="mt-0.5 space-y-0.5 ml-2">{children}</div>}
     </div>
   );
 };
 
-// Menu Item Component
-const MenuItem = ({ to, icon: Icon, label, badge, indent = false }) => {
+// Permission-aware Menu Item Component
+const MenuItem = ({ to, icon: Icon, label, badge, perm }) => {
   const location = useLocation();
-  const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
+  const { hasPerm, hasAnyPerm } = usePermissions();
+  const isActive = location.pathname === to || (to !== '/admin' && location.pathname.startsWith(to + '/'));
+  
+  if (perm) {
+    const perms = Array.isArray(perm) ? perm : [perm];
+    if (!hasAnyPerm(perms)) return null;
+  }
   
   return (
     <Link
       to={to}
-      className={`flex items-center justify-between px-4 py-2.5 rounded-lg transition ${
-        indent ? 'ml-4' : ''
-      } ${
+      data-testid={`nav-${label.toLowerCase().replace(/[\s&\/]+/g, '-')}`}
+      className={`flex items-center justify-between px-3 py-2 rounded-lg transition text-sm ${
         isActive 
-          ? 'bg-primary-blue text-white' 
+          ? 'bg-blue-600 text-white shadow-sm' 
           : 'text-gray-700 hover:bg-gray-100'
       }`}
     >
-      <div className="flex items-center gap-3">
-        {Icon && <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-500'}`} />}
+      <div className="flex items-center gap-2.5">
+        {Icon && <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />}
         <span className="font-medium">{label}</span>
       </div>
       {badge && (
-        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-          isActive ? 'bg-white text-primary-blue' : 'bg-orange-100 text-orange-600'
+        <span className={`px-1.5 py-0.5 text-xs font-semibold rounded-full ${
+          isActive ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-600'
         }`}>
           {badge}
         </span>
@@ -206,6 +240,19 @@ const Dashboard = () => {
     navigate('/admin/login');
   };
 
+  const { t, lang, toggleLang } = useTranslation();
+  const LanguageToggle = () => (
+    <button
+      onClick={toggleLang}
+      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-all hover:bg-gray-50"
+      data-testid="lang-toggle-btn"
+      title={lang === 'en' ? 'Cambiar a Espanol' : 'Switch to English'}
+    >
+      <span className="text-base">{lang === 'en' ? '\uD83C\uDDFA\uD83C\uDDF8' : '\uD83C\uDDEA\uD83C\uDDF8'}</span>
+      <span className="text-gray-600">{lang === 'en' ? 'EN' : 'ES'}</span>
+    </button>
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -222,159 +269,172 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100" data-testid="admin-dashboard">
+    <div className="min-h-screen bg-gray-50" data-testid="admin-dashboard">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="flex items-center justify-between px-6 py-3">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="flex items-center justify-between px-6 py-2.5">
           <div className="flex items-center space-x-4">
             <Link to="/admin" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary-blue rounded-lg flex items-center justify-center">
+              <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">C</span>
               </div>
-              <span className="font-cinzel text-xl font-bold text-primary-blue hidden md:block">
-                Credlocity CMS
+              <span className="font-cinzel text-lg font-bold text-gray-900 hidden md:block">
+                Credlocity
               </span>
             </Link>
           </div>
-          <div className="flex items-center space-x-4">
-            <Link to="/" target="_blank" className="text-sm text-gray-500 hover:text-primary-blue flex items-center gap-1">
-              <ExternalLink className="w-4 h-4" /> View Site
+          <div className="flex items-center space-x-3">
+            {/* Language Toggle */}
+            <LanguageToggle />
+            <Link to="/" target="_blank" className="text-xs text-gray-400 hover:text-blue-600 flex items-center gap-1">
+              <ExternalLink className="w-3.5 h-3.5" /> {t('nav.view_site')}
             </Link>
-            <div className="h-6 w-px bg-gray-200"></div>
-            <span className="text-sm text-gray-600 hidden md:block">
-              {user?.full_name}
-            </span>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-              {user?.role?.replace('_', ' ')}
-            </span>
+            <div className="h-5 w-px bg-gray-200"></div>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-xs font-semibold text-blue-700">{user?.full_name?.charAt(0) || 'U'}</span>
+              </div>
+              <div className="hidden md:block">
+                <p className="text-sm font-medium text-gray-700 leading-none">{user?.full_name}</p>
+                <p className="text-[10px] text-gray-400">{user?.role?.replace('_', ' ')}</p>
+              </div>
+            </div>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={handleLogout}
-              className="flex items-center space-x-2"
+              className="text-gray-400 hover:text-red-500"
               data-testid="logout-btn"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden md:inline">Logout</span>
             </Button>
           </div>
         </div>
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white min-h-[calc(100vh-57px)] shadow-sm overflow-y-auto" data-testid="admin-sidebar">
-          <nav className="p-4 space-y-1">
-            {/* Dashboard */}
-            <MenuItem to="/admin" icon={LayoutDashboard} label="Dashboard" />
+        {/* Sidebar - Restructured by Department */}
+        <aside className="w-60 bg-white min-h-[calc(100vh-49px)] border-r border-gray-200 overflow-y-auto" data-testid="admin-sidebar">
+          <nav className="p-3 space-y-0.5">
+            {/* Master Dashboard */}
+            <MenuItem to="/admin" icon={LayoutDashboard} label={t('nav.dashboard')} perm="dashboard.view" />
+            <MenuItem to="/admin/metrics" icon={BarChart3} label={t('nav.analytics')} perm="dashboard.view" />
 
-            {/* ==================== METRICS ==================== */}
-            <MenuItem to="/admin/metrics" icon={BarChart3} label="Metrics & Analytics" />
-
-            {/* ==================== WEBSITE MANAGEMENT ==================== */}
-            <MenuSection title="Website Management" icon={Globe} defaultOpen={true}>
-              <MenuItem to="/admin/pages" icon={FileText} label="Pages" />
-              <MenuItem to="/admin/blog" icon={MessageSquare} label="Blog" />
-              <MenuItem to="/admin/faqs" icon={HelpCircle} label="FAQs" />
-              <MenuItem to="/admin/press-releases" icon={Newspaper} label="Press Releases" />
-              <MenuItem to="/admin/lawsuits" icon={Scale} label="Lawsuits Filed" />
-              <MenuItem to="/admin/legal-pages" icon={FileText} label="Legal Pages" />
-              <MenuItem to="/admin/banners-popups" icon={Megaphone} label="Banners & Popups" />
-              <MenuItem to="/admin/media" icon={Image} label="Media Library" />
+            {/* ==================== OPERATIONS ==================== */}
+            <div className="pt-3 pb-1"><span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('nav.operations')}</span></div>
+            
+            <MenuSection title={t('nav.collections')} icon={Phone} perm={["collections.view", "collections.manage"]}>
+              <MenuItem to="/admin/collections" icon={LayoutDashboard} label={t('nav.collections_dashboard')} perm="collections.view" />
+              <MenuItem to="/admin/collections/accounts" icon={Users} label={t('nav.accounts')} perm="collections.view" />
+              <MenuItem to="/admin/collections/accounts/new" icon={Plus} label={t('nav.new_account')} perm="collections.manage" />
+              <MenuItem to="/admin/collections/approvals" icon={CheckCircle} label={t('nav.approvals')} perm="collections.manage" />
+              <MenuItem to="/admin/collections/commissions-dashboard" icon={TrendingUp} label={t('nav.commissions')} perm="collections.view" />
+              <MenuItem to="/admin/collections/commission" icon={Settings} label={t('nav.commission_config')} perm="collections.settings" />
+              <MenuItem to="/admin/collections/google-voice" icon={Phone} label={t('nav.voice_settings')} perm="collections.settings" />
+              <MenuItem to="/admin/collections/disputes" icon={AlertTriangle} label={t('nav.disputes')} perm="collections.manage" />
             </MenuSection>
 
-            {/* ==================== SOCIAL PROOF ==================== */}
-            <MenuItem to="/admin/social-proof" icon={Star} label="Social Proof" />
-            <MenuSection title="Review Tools" icon={Award} defaultOpen={false}>
-              <MenuItem to="/admin/review-approval" icon={CheckCircle2} label="Approval Queue" />
-              <MenuItem to="/admin/review-linking" icon={Link2} label="Review Linking" />
-              <MenuItem to="/admin/review-categories" icon={FolderOpen} label="Categories" />
+            <MenuSection title={t('nav.clients')} icon={Users} perm={["clients.view", "clients.manage"]}>
+              <MenuItem to="/admin/clients" icon={Users} label={t('nav.all_clients')} perm="clients.view" />
             </MenuSection>
 
-            {/* ==================== CLIENTS ==================== */}
-            <MenuSection title="Clients" icon={Users} defaultOpen={false}>
-              <MenuItem to="/admin/clients" icon={Users} label="All Clients" />
+            <MenuSection title={t('nav.outsourcing')} icon={Building2} perm={["outsourcing.view", "outsourcing.manage"]}>
+              <MenuItem to="/admin/outsourcing" icon={LayoutDashboard} label={t('nav.outsourcing_dashboard')} perm="outsourcing.view" />
+              <MenuItem to="/admin/outsourcing/inquiries" icon={AlertCircle} label={t('nav.inquiries')} badge={pendingInquiries > 0 ? pendingInquiries : null} perm="outsourcing.view" />
+              <MenuItem to="/admin/outsourcing/partners" icon={Building2} label={t('nav.partners_list')} perm="outsourcing.view" />
+              <MenuItem to="/admin/outsourcing/tickets" icon={AlertCircle} label={t('nav.escalations')} perm="outsourcing.manage" />
+              <MenuItem to="/admin/outsourcing/work-logs" icon={ClipboardList} label={t('nav.work_logs')} perm="outsourcing.view" />
+              <MenuItem to="/admin/outsourcing/invoices" icon={Receipt} label={t('nav.invoices')} perm="outsourcing.manage" />
             </MenuSection>
 
-            {/* ==================== COLLECTIONS ==================== */}
-            <MenuSection title="Collections" icon={Phone} defaultOpen={false}>
-              <MenuItem to="/admin/collections" icon={LayoutDashboard} label="Dashboard" />
-              <MenuItem to="/admin/collections/accounts" icon={Users} label="All Accounts" />
-              <MenuItem to="/admin/collections/accounts/new" icon={Plus} label="Create Account" />
-              <MenuItem to="/admin/collections/approvals" icon={CheckCircle} label="Approval Queue" />
-              <MenuItem to="/admin/collections/google-voice" icon={Phone} label="Google Voice Settings" />
-              <MenuItem to="/admin/collections/disputes" icon={AlertTriangle} label="Disputes" />
-              <MenuItem to="/admin/collections/commission" icon={DollarSign} label="Commission" />
+            {/* ==================== LEGAL ==================== */}
+            <div className="pt-3 pb-1"><span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('nav.legal')}</span></div>
+            
+            <MenuSection title={t('nav.attorney_marketplace')} icon={Gavel} perm={["legal.view", "legal.manage"]}>
+              <MenuItem to="/admin/marketplace" icon={Gavel} label={t('nav.case_management')} perm="legal.view" />
+              <MenuItem to="/admin/cases/new" icon={Plus} label={t('nav.submit_case')} perm="legal.manage" />
+              <MenuItem to="/admin/attorneys" icon={Scale} label={t('nav.attorney_network')} perm="legal.view" />
+              <MenuItem to="/admin/attorneys/penalties" icon={AlertTriangle} label={t('nav.penalties')} perm="legal.manage" />
+              <MenuItem to="/admin/revenue/splits" icon={DollarSign} label={t('nav.revenue_splits')} perm="legal.manage" />
             </MenuSection>
 
-            {/* ==================== OUTSOURCING ==================== */}
-            <MenuSection title="Outsourcing" icon={Building2} defaultOpen={false}>
-              <MenuItem to="/admin/outsourcing" icon={LayoutDashboard} label="Dashboard" />
-              <MenuItem to="/admin/outsourcing/inquiries" icon={AlertCircle} label="Inquiries" badge={pendingInquiries > 0 ? pendingInquiries : null} />
-              <MenuItem to="/admin/outsourcing/partners" icon={Building2} label="Partners" />
-              <MenuItem to="/admin/outsourcing/tickets" icon={AlertCircle} label="Escalations" />
-              <MenuItem to="/admin/outsourcing/work-logs" icon={ClipboardList} label="Work Logs" />
-              <MenuItem to="/admin/outsourcing/invoices" icon={Receipt} label="Invoices" />
+            <MenuItem to="/admin/lawsuits" icon={Scale} label={t('nav.lawsuits_filed')} perm="legal.view" />
+
+            {/* ==================== MARKETING ==================== */}
+            <div className="pt-3 pb-1"><span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('nav.marketing')}</span></div>
+            
+            <MenuSection title={t('nav.website')} icon={Globe} perm={["marketing.view", "marketing.manage"]} defaultOpen={false}>
+              <MenuItem to="/admin/pages" icon={FileText} label={t('nav.pages')} perm="marketing.view" />
+              <MenuItem to="/admin/blog" icon={MessageSquare} label={t('nav.blog')} perm="marketing.view" />
+              <MenuItem to="/admin/faqs" icon={HelpCircle} label={t('nav.faqs')} perm="marketing.view" />
+              <MenuItem to="/admin/press-releases" icon={Newspaper} label={t('nav.press_releases')} perm="marketing.view" />
+              <MenuItem to="/admin/legal-pages" icon={FileText} label={t('nav.legal_pages')} perm="marketing.manage" />
+              <MenuItem to="/admin/banners-popups" icon={Megaphone} label={t('nav.banners_popups')} perm="marketing.manage" />
+              <MenuItem to="/admin/media" icon={Image} label={t('nav.media_library')} perm="marketing.view" />
             </MenuSection>
 
-            {/* ==================== BILLING & INVOICES ==================== */}
-            <MenuItem to="/admin/billing" icon={DollarSign} label="Billing & Invoices" />
-
-            {/* ==================== ATTORNEY MARKETPLACE ==================== */}
-            <MenuSection title="Attorney Marketplace" icon={Gavel} defaultOpen={false}>
-              <MenuItem to="/admin/marketplace" icon={Gavel} label="Case Management" />
-              <MenuItem to="/admin/cases/new" icon={Plus} label="Submit New Case" />
-              <MenuItem to="/admin/attorneys" icon={Scale} label="Attorney Network" />
-              <MenuItem to="/admin/attorneys/penalties" icon={AlertTriangle} label="Case Update Penalties" />
-              <MenuItem to="/admin/revenue/splits" icon={DollarSign} label="Revenue Splits" />
+            <MenuSection title={t('nav.reviews_social')} icon={Star} perm={["reviews.view", "reviews.manage"]}>
+              <MenuItem to="/admin/social-proof" icon={Star} label={t('nav.reviews')} perm="reviews.view" />
+              <MenuItem to="/admin/review-approval" icon={CheckCircle2} label={t('nav.approvals')} perm="reviews.manage" />
+              <MenuItem to="/admin/review-linking" icon={Link2} label={t('nav.reviews')} perm="reviews.manage" />
+              <MenuItem to="/admin/review-categories" icon={FolderOpen} label={t('nav.categories')} perm="reviews.manage" />
             </MenuSection>
 
-            {/* ==================== AFFILIATE PROGRAM ==================== */}
-            <MenuSection title="Affiliate Program" icon={ExternalLink} defaultOpen={false}>
-              <MenuItem to="/admin/partner-leads" icon={Users} label="Affiliate Leads" />
-              <MenuItem to="/admin/affiliates" icon={ExternalLink} label="Competitor Comparisons" />
+            {/* ==================== HR & PAYROLL ==================== */}
+            <div className="pt-3 pb-1"><span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('nav.hr_payroll')}</span></div>
+            
+            <MenuItem to="/admin/team" icon={Users} label={t('nav.team_management')} perm="team.view" />
+            <MenuItem to="/admin/authors" icon={UserCog} label={t('nav.authors_profiles')} perm="team.manage" />
+            <MenuItem to="/admin/payroll" icon={Wallet} label={t('nav.payroll')} perm="payroll.view" />
+            <MenuItem to="/admin/training" icon={GraduationCap} label={t('nav.training')} perm="training.view" />
+            <MenuItem to="/admin/security" icon={Shield} label={t('nav.security')} perm="security.view" />
+
+            {/* ==================== FINANCE ==================== */}
+            <div className="pt-3 pb-1"><span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('nav.finance')}</span></div>
+            
+            <MenuItem to="/admin/billing" icon={CreditCard} label={t('nav.billing')} perm="billing.view" />
+
+            {/* ==================== PARTNERS ==================== */}
+            <div className="pt-3 pb-1"><span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('nav.partners')}</span></div>
+            
+            <MenuSection title={t('nav.affiliates_partners')} icon={Award} perm={["partners.view", "partners.manage"]}>
+              <MenuItem to="/admin/partner-leads" icon={Users} label={t('nav.affiliate_leads')} perm="partners.view" />
+              <MenuItem to="/admin/affiliates" icon={ExternalLink} label={t('nav.comparisons')} perm="partners.view" />
+              <MenuItem to="/admin/partners" icon={Award} label={t('nav.credlocity_partners')} perm="partners.view" />
+              <MenuItem to="/admin/partners/new" icon={Plus} label={t('nav.add_partner')} perm="partners.manage" />
             </MenuSection>
 
-            {/* ==================== CREDLOCITY PARTNERS ==================== */}
-            <MenuSection title="Credlocity Partners" icon={Award} defaultOpen={false}>
-              <MenuItem to="/admin/partners" icon={Users} label="All Partners" />
-              <MenuItem to="/admin/partners/new" icon={Plus} label="Add Partner" />
+            {/* ==================== TOOLS ==================== */}
+            <div className="pt-3 pb-1"><span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('nav.tools')}</span></div>
+            
+            <MenuSection title={t('nav.forms_calendars')} icon={ClipboardList} perm={["forms.view", "forms.manage"]}>
+              <MenuItem to="/admin/intake-forms" icon={ClipboardList} label={t('nav.intake_forms')} perm="forms.view" />
+              <MenuItem to="/admin/calendars" icon={Calendar} label={t('nav.calendars')} perm="forms.view" />
             </MenuSection>
 
-            {/* ==================== FORM BUILDER ==================== */}
-            <MenuSection title="Form Builder" icon={ClipboardList} defaultOpen={false}>
-              <MenuItem to="/admin/intake-forms" icon={ClipboardList} label="Intake Forms" />
-              <MenuItem to="/admin/calendars" icon={Calendar} label="Calendars" />
+            <MenuSection title={t('nav.chat_support')} icon={MessageCircle} perm={["chat.view", "chat.manage"]}>
+              <MenuItem to="/admin/chat" icon={MessageCircle} label={t('nav.team_chat')} perm="chat.view" />
+              <MenuItem to="/admin/support-chat" icon={Headphones} label={t('nav.customer_support')} perm="chat.manage" />
             </MenuSection>
 
-            {/* ==================== TEAM ==================== */}
-            <MenuSection title="Team" icon={Users} defaultOpen={false}>
-              <MenuItem to="/admin/authors" icon={Users} label="Authors / Team" />
-              <MenuItem to="/admin/team" icon={Users} label="Team Management" />
-            </MenuSection>
+            <MenuItem to="/admin/document-center" icon={BookOpen} label={t('nav.document_center')} />
 
-            {/* ==================== CHAT SYSTEMS ==================== */}
-            <MenuSection title="Chat & Support" icon={MessageCircle} defaultOpen={false}>
-              <MenuItem to="/admin/chat" icon={MessageCircle} label="Internal Team Chat" />
-              <MenuItem to="/admin/support-chat" icon={Headphones} label="Customer Support" />
-            </MenuSection>
-
-            {/* ==================== SECURITY ==================== */}
-            <MenuItem to="/admin/security" icon={Shield} label="Security" />
-
-            {/* ==================== SETTINGS ==================== */}
-            <MenuSection title="Settings" icon={Settings} defaultOpen={false}>
-              <MenuItem to="/admin/settings" icon={Settings} label="Site Settings" />
-              <MenuItem to="/admin/settings/lawsuits" icon={Scale} label="Lawsuit Config" />
-              <MenuItem to="/admin/complaints" icon={AlertCircle} label="Complaint Portal" />
+            {/* ==================== ADMIN ==================== */}
+            <div className="pt-3 pb-1"><span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('nav.admin')}</span></div>
+            
+            <MenuItem to="/admin/access-control" icon={Shield} label={t('nav.access_control')} perm="settings.manage" />
+            <MenuSection title={t('nav.settings')} icon={Settings} perm={["settings.view", "settings.manage"]}>
+              <MenuItem to="/admin/settings" icon={Settings} label={t('nav.site_settings')} perm="settings.view" />
+              <MenuItem to="/admin/settings/lawsuits" icon={Scale} label={t('nav.lawsuit_config')} perm="settings.manage" />
+              <MenuItem to="/admin/complaints" icon={AlertCircle} label={t('nav.complaints')} perm="settings.view" />
             </MenuSection>
           </nav>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8 overflow-auto">
+        <main className="flex-1 p-6 overflow-auto min-h-[calc(100vh-49px)]">
           <Routes>
-            <Route index element={<DashboardHome />} />
+            <Route index element={<SmartDashboard />} />
             <Route path="pages" element={<PagesList />} />
             <Route path="pages/create" element={<CreatePage />} />
             <Route path="pages/edit/:pageId" element={<EditPage />} />
@@ -457,9 +517,21 @@ const Dashboard = () => {
             {/* Security Dashboard Routes */}
             <Route path="security" element={<SecurityDashboard />} />
 
+            {/* Access Control (RBAC) */}
+            <Route path="access-control" element={<PermissionsManager />} />
+
             {/* Chat Systems Routes */}
             <Route path="chat" element={<InternalChat />} />
             <Route path="support-chat" element={<SupportChatDashboard />} />
+
+            {/* Training & Policies Routes */}
+            <Route path="training" element={<TrainingCenter />} />
+
+            {/* Payroll Routes */}
+            <Route path="payroll" element={<PayrollDashboard />} />
+
+            {/* Document Center */}
+            <Route path="document-center" element={<DocumentCenter />} />
 
             {/* Form Builder / CMS Routes */}
             <Route path="intake-forms" element={<IntakeFormsManager />} />
@@ -474,7 +546,8 @@ const Dashboard = () => {
             <Route path="collections/approvals" element={<CollectionsApprovalQueue />} />
             <Route path="collections/google-voice" element={<GoogleVoiceSettings />} />
             <Route path="collections/disputes" element={<div className="text-gray-600">Dispute Tickets - Coming Soon</div>} />
-            <Route path="collections/commission" element={<div className="text-gray-600">Commission Dashboard - Coming Soon</div>} />
+            <Route path="collections/commission" element={<CollectionsCommissionSettings />} />
+            <Route path="collections/commissions-dashboard" element={<CommissionDashboard />} />
 
             {/* Outsourcing Routes */}
             <Route path="outsourcing" element={<OutsourcingDashboard />} />
@@ -496,6 +569,7 @@ const Dashboard = () => {
           </Routes>
         </main>
       </div>
+      <CMSChatBubble />
     </div>
   );
 };

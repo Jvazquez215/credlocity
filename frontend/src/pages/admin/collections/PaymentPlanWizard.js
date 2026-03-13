@@ -10,93 +10,97 @@ import { Textarea } from '../../../components/ui/textarea';
 import { toast } from 'sonner';
 import {
   ArrowLeft, ArrowRight, Check, DollarSign, Calculator,
-  CreditCard, FileText, Calendar, AlertCircle, Percent, Lock, Unlock, ShieldCheck
+  CreditCard, FileText, Calendar, AlertCircle, Percent, Lock, Unlock, ShieldCheck, Clock
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
-// Tier configuration per Credlocity Waiver Rules
-// Tier 1 = Maximum Authority (Escalation/Risk Resolution)
-// Tier 2 = Standard Collections  
-// Tier 3 = Limited Authority
+// Tier configuration per Credlocity Collection Handbook
+// Tier 1 = Payment in Full (Best Deal for Client)
+// Tier 2 = Payment Plan (3-4 Months)
+// Tier 3 = Extended Payment Plan (5-6 Months)
 const TIER_CONFIG = {
   1: { 
     label: 'Tier 1', 
-    name: 'Escalation / Risk Resolution',
+    name: 'Payment in Full',
+    description: 'Full payment within 5 business days',
     color: 'bg-green-100 text-green-700 border-green-300', 
-    approval: 'supervisor',
-    fullPayDiscount: 35, 
-    planDiscount: 20,
-    minDownPercent: 50, 
-    maxMonths: 6, 
-    commission: { full: 30, plan: 15, downPayment: 5, monthly: 3, completion: 2 }
+    approval: null,
+    minDownPercent: 100, 
+    maxMonths: 0, 
+    commission: { baseRate: 20 },
+    waiverLimits: { collectionFee: 125, paymentProcessing: 70, lateFees: 'all', conditionalFreeTrial: true }
   },
   2: { 
     label: 'Tier 2', 
-    name: 'Standard Collections',
+    name: 'Payment Plan (3-4 Months)',
+    description: 'Min 25% down within 5 days, autopay required',
     color: 'bg-yellow-100 text-yellow-700 border-yellow-300', 
     approval: 'supervisor',
-    fullPayDiscount: 25, 
-    planDiscount: 10,
-    minDownPercent: 40, 
-    maxMonths: 6, 
-    commission: { full: 20, plan: 10, downPayment: 5, monthly: 3, completion: 2 }
+    minDownPercent: 25, 
+    maxMonths: 4, 
+    commission: { baseRate: 20 },
+    waiverLimits: { collectionFee: 75, paymentProcessing: 40, lateFees: 2, conditionalFreeTrial: true, conditionalMaxPercent: 50 }
   },
   3: { 
     label: 'Tier 3', 
-    name: 'Limited Authority',
+    name: 'Extended Plan (5-6 Months)',
+    description: 'Min 30% down within 5 days, autopay + late payment penalties',
     color: 'bg-red-100 text-red-700 border-red-300', 
     approval: 'collections_manager',
-    fullPayDiscount: 15, 
-    planDiscount: 0,
-    minDownPercent: 40, 
-    maxMonths: 3, 
-    commission: { full: 12, plan: 6, downPayment: 5, monthly: 3, completion: 2 }
+    minDownPercent: 30, 
+    maxMonths: 6, 
+    commission: { baseRate: 20 },
+    waiverLimits: { collectionFee: 50, paymentProcessing: 25, lateFees: 1, lateFeeRequiresDownPercent: 40, conditionalFreeTrial: false }
   }
 };
 
-// Waiver rules per Tier and Customer Type
+// Waiver rules per Tier per Credlocity Collection Handbook
 const WAIVER_RULES = {
-  // Payment Plan rules
   plan: {
-    3: { // Tier 3 - Payment Plan
-      collection_fee: { enabled: true, approval: 'auto', max_percent: 100 },
-      payment_processing: { enabled: true, approval: 'auto', max_percent: 50 },
-      file_processing: { enabled: true, approval: 'supervisor', max_percent: 100, min_collect: 75 },
-      conditional_credit: { enabled: false }
+    3: {
+      collection_fee: { enabled: true, approval: 'auto', max_amount: 50 },
+      payment_processing: { enabled: true, approval: 'auto', max_amount: 25 },
+      file_processing: { enabled: false },
+      conditional_credit: { enabled: false },
+      late_fees: { enabled: true, max_count: 1, requires_down_percent: 40 }
     },
-    2: { // Tier 2 - Payment Plan
-      collection_fee: { enabled: true, approval: 'auto', max_percent: 100 },
-      payment_processing: { enabled: true, approval: 'auto', max_percent: 100 },
-      file_processing: { enabled: true, approval: 'supervisor', max_percent: 50 },
-      conditional_credit: { enabled: false }
+    2: {
+      collection_fee: { enabled: true, approval: 'auto', max_amount: 75 },
+      payment_processing: { enabled: true, approval: 'auto', max_amount: 40 },
+      file_processing: { enabled: false },
+      conditional_credit: { enabled: true, approval: 'supervisor', max_percent: 50, label: '50% waive if down >= 30%' },
+      late_fees: { enabled: true, max_count: 2 }
     },
-    1: { // Tier 1 - Payment Plan (Maximum Authority)
-      collection_fee: { enabled: true, approval: 'auto', max_percent: 100 },
-      payment_processing: { enabled: true, approval: 'auto', max_percent: 100 },
-      file_processing: { enabled: true, approval: 'supervisor', max_percent: 100 },
-      conditional_credit: { enabled: true, approval: 'compliance', label: 'Earned Credit (Post-Performance)' }
+    1: {
+      collection_fee: { enabled: true, approval: 'auto', max_amount: 125 },
+      payment_processing: { enabled: true, approval: 'auto', max_amount: 70 },
+      file_processing: { enabled: false },
+      conditional_credit: { enabled: true, approval: 'auto', max_percent: 100 },
+      late_fees: { enabled: true, max_count: 99, max_percent_of_past_due: 20 }
     }
   },
-  // Pay-In-Full rules (Higher Authority)
   full: {
-    3: { // Tier 3 - PIF
-      collection_fee: { enabled: true, approval: 'auto', max_percent: 100 },
-      payment_processing: { enabled: true, approval: 'auto', max_percent: 100 },
-      file_processing: { enabled: true, approval: 'supervisor', max_percent: 50 },
-      conditional_credit: { enabled: false }
+    3: {
+      collection_fee: { enabled: true, approval: 'auto', max_amount: 50 },
+      payment_processing: { enabled: true, approval: 'auto', max_amount: 25 },
+      file_processing: { enabled: false },
+      conditional_credit: { enabled: false },
+      late_fees: { enabled: true, max_count: 1, requires_down_percent: 40 }
     },
-    2: { // Tier 2 - PIF
-      collection_fee: { enabled: true, approval: 'auto', max_percent: 100 },
-      payment_processing: { enabled: true, approval: 'auto', max_percent: 100 },
-      file_processing: { enabled: true, approval: 'supervisor', max_percent: 100 },
-      conditional_credit: { enabled: true, approval: 'supervisor', max_percent: 50, label: 'Partial Credit Only' }
+    2: {
+      collection_fee: { enabled: true, approval: 'auto', max_amount: 75 },
+      payment_processing: { enabled: true, approval: 'auto', max_amount: 40 },
+      file_processing: { enabled: false },
+      conditional_credit: { enabled: true, approval: 'supervisor', max_percent: 50 },
+      late_fees: { enabled: true, max_count: 2 }
     },
-    1: { // Tier 1 - PIF (MAXIMUM AUTHORITY)
-      collection_fee: { enabled: true, approval: 'auto', max_percent: 100 },
-      payment_processing: { enabled: true, approval: 'auto', max_percent: 100 },
-      file_processing: { enabled: true, approval: 'auto', max_percent: 100 },
-      conditional_credit: { enabled: true, approval: 'compliance', max_percent: 100 }
+    1: {
+      collection_fee: { enabled: true, approval: 'auto', max_amount: 125 },
+      payment_processing: { enabled: true, approval: 'auto', max_amount: 70 },
+      file_processing: { enabled: false },
+      conditional_credit: { enabled: true, approval: 'auto', max_percent: 100 },
+      late_fees: { enabled: true, max_count: 99, max_percent_of_past_due: 20 }
     }
   }
 };
@@ -116,16 +120,17 @@ export default function PaymentPlanWizard() {
   const initialTier = parseInt(searchParams.get('tier')) || 2;
   const [selectedTier, setSelectedTier] = useState(Math.min(Math.max(initialTier, 1), 3));
   
-  // Fee amounts (from account line items or defaults)
+  // Fee amounts per 2024+ service agreements
   const [fees, setFees] = useState({
-    // Non-waivable (system-locked)
-    monthly_service_fees: 0,
-    services_rendered: 0,
+    // Non-waivable
+    past_due_invoices: 0,
+    collection_file_processing: 150.00,
     // Waivable with rules
     collection_fee: 350.00,
-    payment_processing: 0,
-    file_processing: 199.80,
-    conditional_credit: 0
+    payment_processing: 190.00,
+    conditional_credit: 0,
+    // Late fees (calculated from days past due)
+    late_fees: []
   });
   
   // Waiver amounts (how much is being waived)
@@ -167,15 +172,22 @@ export default function PaymentPlanWizard() {
         const data = await res.json();
         setAccount(data);
         
-        // Initialize fees from account line items or defaults
-        const monthsOverdue = Math.ceil(data.days_past_due / 30);
+        // Calculate late fees based on days past due
+        const daysPastDue = data.days_past_due || 0;
+        const lateFees = [];
+        if (daysPastDue >= 1 && daysPastDue <= 10) lateFees.push({ label: '1-10 days late', amount: 10.50 });
+        else if (daysPastDue >= 11 && daysPastDue <= 15) lateFees.push({ label: '11-15 days late', amount: 17.50 });
+        else if (daysPastDue >= 16 && daysPastDue <= 30) lateFees.push({ label: '16-30 days late', amount: 30.00 });
+        else if (daysPastDue >= 31 && daysPastDue <= 90) lateFees.push({ label: '31-90 days late', amount: 50.00 });
+        else if (daysPastDue > 90) lateFees.push({ label: '90+ days late', amount: 50.00 });
+
         setFees(f => ({
           ...f,
-          monthly_service_fees: monthsOverdue * (data.monthly_rate || 179.95),
-          services_rendered: monthsOverdue * (data.monthly_rate || 179.95),
+          past_due_invoices: data.past_due_balance || 0,
+          collection_file_processing: 150.00,
           collection_fee: 350.00,
-          payment_processing: 0,
-          file_processing: 199.80
+          payment_processing: 190.00,
+          late_fees: lateFees
         }));
       }
     } catch (error) {
@@ -223,13 +235,15 @@ export default function PaymentPlanWizard() {
     setApprovalRequired(checkApprovalRequired());
   }, [waivers, customerType, selectedTier]);
 
-  // Calculate totals
+  // Calculate totals per new fee structure
+  const totalLateFees = () => (fees.late_fees || []).reduce((sum, lf) => sum + lf.amount, 0);
+
   const calculateNonWaivableTotal = () => {
-    return fees.monthly_service_fees;
+    return fees.past_due_invoices + fees.collection_file_processing;
   };
 
   const calculateWaivableTotal = () => {
-    return fees.collection_fee + fees.payment_processing + fees.file_processing + fees.conditional_credit;
+    return fees.collection_fee + fees.payment_processing + totalLateFees() + fees.conditional_credit;
   };
 
   const calculateTotalWaived = () => {
@@ -245,18 +259,22 @@ export default function PaymentPlanWizard() {
   };
 
   const calculateTierDiscount = () => {
-    const tier = TIER_CONFIG[selectedTier];
-    if (!tier || !customerType) return 0;
-    const discountPercent = customerType === 'full' ? tier.fullPayDiscount : tier.planDiscount;
-    return calculateTotalBeforeDiscount() * (discountPercent / 100);
+    return 0; // No tier discount in new system — waivers replace discounts
   };
 
   const calculateAdjustedTotal = () => {
-    return calculateTotalBeforeDiscount() - calculateTierDiscount();
+    return calculateTotalBeforeDiscount();
   };
 
-  // Collection fee rep keeps (100% of what's not waived)
+  // Collection fee rep keeps (100% of what's not waived — goes to paycheck immediately)
   const collectionFeeKept = fees.collection_fee - waivers.collection_fee;
+
+  // Commission base = past_due_invoices + late fees kept + file processing + payment processing kept
+  // EXCLUDES collection fee (rep keeps that separately)
+  const lateFeeKept = totalLateFees() - waivers.file_processing;
+  const commissionBase = fees.past_due_invoices + lateFeeKept + fees.collection_file_processing + (fees.payment_processing - waivers.payment_processing);
+  const commissionRate = 20;
+  const commissionAmount = commissionBase * (commissionRate / 100);
 
   // Safe calculation for remaining balance
   const safeAdjustedTotal = () => {
@@ -275,50 +293,51 @@ export default function PaymentPlanWizard() {
     }
   }, [remainingBalance, plan.number_of_payments]);
 
-  // Commission calculation
+  // Commission calculation — matches Credlocity handbook rules
   const calculateCommission = () => {
     const tier = TIER_CONFIG[selectedTier];
     if (!tier || !customerType) return null;
     
-    const total = safeAdjustedTotal();
+    // Commission base = everything collected EXCEPT the collection fee
+    // Late fees waived reduce the commission base
+    const lateFeesKeptAmount = totalLateFees() - waivers.file_processing;
+    const processingKept = fees.payment_processing - waivers.payment_processing;
+    const base = fees.past_due_invoices + lateFeesKeptAmount + fees.collection_file_processing + processingKept;
+    const rate = tier.commission.baseRate;
+    const baseComm = base * (rate / 100);
     
     if (customerType === 'full') {
-      const baseCommission = total * (tier.commission.full / 100);
       return { 
         collectionFee: collectionFeeKept,
-        collectionFeeNote: '100% yours (minus waived)',
-        baseCommission, 
-        baseRate: tier.commission.full,
-        immediate: collectionFeeKept + baseCommission,
-        total: collectionFeeKept + baseCommission,
-        type: 'Full Payment' 
+        collectionFeeNote: collectionFeeKept > 0 ? 'Paid immediately upon payment' : 'Fully waived — $0',
+        baseCommission: baseComm, 
+        baseRate: rate,
+        commissionBase: base,
+        immediate: collectionFeeKept + baseComm,
+        total: collectionFeeKept + baseComm,
+        type: 'Full Payment',
+        thresholdNote: 'Paid immediately (payment in full)'
       };
     } else {
-      const downCommission = plan.down_payment_amount * (tier.commission.downPayment / 100);
-      const monthlyCommission = remainingBalance * (tier.commission.monthly / 100);
-      const completionBonus = total * (tier.commission.completion / 100);
       return {
         collectionFee: collectionFeeKept,
-        collectionFeeNote: '100% yours (minus waived)',
-        downPayment: downCommission,
-        downRate: tier.commission.downPayment,
-        monthly: monthlyCommission,
-        monthlyRate: tier.commission.monthly,
-        completion: completionBonus,
-        completionRate: tier.commission.completion,
-        immediate: collectionFeeKept + downCommission,
-        totalPotential: collectionFeeKept + downCommission + monthlyCommission + completionBonus,
-        type: 'Payment Plan'
+        collectionFeeNote: collectionFeeKept > 0 ? 'Paid immediately upon payment' : 'Fully waived — $0',
+        baseCommission: baseComm,
+        baseRate: rate,
+        commissionBase: base,
+        immediate: collectionFeeKept,
+        totalPotential: collectionFeeKept + baseComm,
+        type: 'Payment Plan',
+        thresholdNote: `${rate}% commission unlocks when 70% of $${safeAdjustedTotal().toFixed(2)} is collected ($${(safeAdjustedTotal() * 0.70).toFixed(2)})`
       };
     }
   };
 
-  // Helper function to handle waiver input change (not a component to avoid focus loss)
-  const handleWaiverChange = (feeKey, value, originalAmount, maxPercent, minCollect = 0) => {
-    const maxWaiver = originalAmount * (maxPercent / 100);
+  // Helper function to handle waiver input change
+  const handleWaiverChange = (feeKey, value, originalAmount, maxAmount) => {
     let val = parseFloat(value) || 0;
-    if (val > maxWaiver) val = maxWaiver;
-    if (minCollect > 0 && (originalAmount - val) < minCollect) val = originalAmount - minCollect;
+    if (maxAmount !== undefined && val > maxAmount) val = maxAmount;
+    if (val > originalAmount) val = originalAmount;
     setWaivers(w => ({ ...w, [feeKey]: val }));
   };
 
@@ -393,31 +412,33 @@ export default function PaymentPlanWizard() {
       }
 
       // No approvals needed - create agreement directly
+      const lateFeeTotal = totalLateFees();
       const res = await fetch(`${API_URL}/api/collections/accounts/${accountId}/payment-plan`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tier_accepted: selectedTier,
-          tier_name: tier.label,
+          tier_name: tier.label + ' - ' + tier.name,
           customer_type: customerType,
           payment_type: customerType,
           original_balance: account.past_due_balance,
-          discount_percentage: customerType === 'full' ? tier.fullPayDiscount : tier.planDiscount,
+          // Non-waivable fees
+          credit_reports_charge: fees.past_due_invoices,
+          services_rendered_charge: fees.collection_file_processing,
           // Fee breakdown
           non_waivable_total: calculateNonWaivableTotal(),
           collection_fee_original: fees.collection_fee,
           collection_fee_waived: waivers.collection_fee,
           collection_fee_adjusted: fees.collection_fee - waivers.collection_fee,
           collection_fee_reason: waivers.collection_fee_reason,
-          payment_processing_original: fees.payment_processing,
-          payment_processing_waived: waivers.payment_processing,
-          payment_processing_adjusted: fees.payment_processing - waivers.payment_processing,
-          file_processing_original: fees.file_processing,
-          file_processing_waived: waivers.file_processing,
-          file_processing_adjusted: fees.file_processing - waivers.file_processing,
+          payment_processing_fee_original: fees.payment_processing,
+          payment_processing_fee_adjusted: fees.payment_processing - waivers.payment_processing,
+          file_processing_fee_original: fees.collection_file_processing,
+          file_processing_fee_adjusted: fees.collection_file_processing,
+          late_fees_original: lateFeeTotal,
+          late_fees_adjusted: lateFeeTotal - waivers.file_processing,
           // Totals
           total_waived: calculateTotalWaived(),
-          tier_discount: calculateTierDiscount(),
           adjusted_balance: calculateAdjustedTotal(),
           // Payment terms
           ...plan,
@@ -500,9 +521,9 @@ export default function PaymentPlanWizard() {
                 </div>
                 <p className="text-sm text-gray-600 mb-4">Customer will pay the full settlement amount immediately. Higher waiver authority available.</p>
                 <div className="space-y-1 text-sm">
-                  <p className="text-green-600">✓ Maximum waiver flexibility</p>
-                  <p className="text-green-600">✓ Up to 35% tier discount</p>
-                  <p className="text-green-600">✓ Higher commission rates</p>
+                  <p className="text-green-600">+ Maximum waiver flexibility</p>
+                  <p className="text-green-600">+ Commission paid immediately</p>
+                  <p className="text-green-600">+ Best deal for client</p>
                 </div>
               </div>
               
@@ -552,17 +573,18 @@ export default function PaymentPlanWizard() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <Badge className={tc.color}>{tc.label}</Badge>
-                      {t === 1 && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Max Authority</span>}
+                      {t === 1 && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Best Deal</span>}
                     </div>
                     <p className="font-medium text-sm mb-1">{tc.name}</p>
+                    <p className="text-xs text-gray-500 mb-2">{tc.description}</p>
                     <div className="grid grid-cols-2 gap-2 text-xs mt-3">
                       <div className="p-2 bg-gray-50 rounded">
-                        <p className="text-gray-500">PIF Discount</p>
-                        <p className="font-semibold">{tc.fullPayDiscount}%</p>
+                        <p className="text-gray-500">Min Down</p>
+                        <p className="font-semibold">{tc.minDownPercent}%</p>
                       </div>
                       <div className="p-2 bg-gray-50 rounded">
-                        <p className="text-gray-500">Plan Discount</p>
-                        <p className="font-semibold">{tc.planDiscount}%</p>
+                        <p className="text-gray-500">Max Months</p>
+                        <p className="font-semibold">{tc.maxMonths === 0 ? 'Immediate' : tc.maxMonths}</p>
                       </div>
                     </div>
                   </div>
@@ -573,7 +595,8 @@ export default function PaymentPlanWizard() {
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-800">
                 <strong>Selected:</strong> {tier.label} - {tier.name} | 
-                <strong> {customerType === 'full' ? 'PIF' : 'Payment Plan'}:</strong> {customerType === 'full' ? tier.fullPayDiscount : tier.planDiscount}% discount
+                <strong> Min Down:</strong> {tier.minDownPercent}% | 
+                <strong> Max Months:</strong> {tier.maxMonths === 0 ? 'Immediate' : tier.maxMonths}
               </p>
             </div>
           </CardContent>
@@ -593,12 +616,18 @@ export default function PaymentPlanWizard() {
             {/* Non-Waivable Section */}
             <div className="p-4 bg-red-50 rounded-lg border border-red-200">
               <h3 className="font-semibold text-red-700 mb-3 flex items-center gap-2">
-                <Lock className="w-4 h-4" />Non-Waivable Charges (System-Locked)
+                <Lock className="w-4 h-4" />Non-Waivable Charges
               </h3>
-              <p className="text-sm text-red-600 mb-3">Monthly Service Fees and Contractually Earned Charges cannot be waived.</p>
-              <div className="flex justify-between items-center p-3 bg-white rounded">
-                <span>Monthly Service Fees</span>
-                <span className="font-bold">${fees.monthly_service_fees.toFixed(2)}</span>
+              <p className="text-sm text-red-600 mb-3">Past due invoices and collection file processing fee cannot be waived.</p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center p-3 bg-white rounded">
+                  <span>Past Due Invoices</span>
+                  <span className="font-bold">${fees.past_due_invoices.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-white rounded">
+                  <span>Collection File Processing Fee</span>
+                  <span className="font-bold">${fees.collection_file_processing.toFixed(2)}</span>
+                </div>
               </div>
             </div>
 
@@ -617,29 +646,30 @@ export default function PaymentPlanWizard() {
                   </div>
                   <Badge className="bg-green-100 text-green-700"><Unlock className="w-3 h-3 mr-1" />Rep-Owned</Badge>
                 </div>
+                <p className="text-xs text-gray-500 mb-2">You keep 100% of what's collected. Max waive: ${rules?.collection_fee?.max_amount || 175}.00</p>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <p className="text-xs text-gray-500">Original</p>
                     <p className="font-semibold">${fees.collection_fee.toFixed(2)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Waive Amount (max 100%)</p>
+                    <p className="text-xs text-gray-500">Waive Amount (max ${rules?.collection_fee?.max_amount || 175})</p>
                     <div className="relative">
                       <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                       <input 
                         type="number" 
                         min={0}
-                        max={fees.collection_fee}
+                        max={rules?.collection_fee?.max_amount || 175}
                         step={0.01}
                         value={waivers.collection_fee}
-                        onChange={(e) => handleWaiverChange('collection_fee', e.target.value, fees.collection_fee, 100)}
+                        onChange={(e) => handleWaiverChange('collection_fee', e.target.value, fees.collection_fee, rules?.collection_fee?.max_amount || 175)}
                         className="w-full pl-6 h-8 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Final Amount</p>
-                    <p className="font-semibold text-lg">${(fees.collection_fee - waivers.collection_fee).toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">You Keep</p>
+                    <p className="font-semibold text-lg text-green-600">${(fees.collection_fee - waivers.collection_fee).toFixed(2)}</p>
                   </div>
                 </div>
                 {waivers.collection_fee > 0 && (
@@ -653,15 +683,14 @@ export default function PaymentPlanWizard() {
                       <option value="">Select reason...</option>
                       <option value="hardship">Financial Hardship</option>
                       <option value="goodwill">Goodwill Adjustment</option>
-                      <option value="error">Billing Error</option>
-                      <option value="retention">Customer Retention</option>
                       <option value="negotiation">Settlement Negotiation</option>
+                      <option value="retention">Customer Retention</option>
                     </select>
                   </div>
                 )}
               </div>
               
-              {/* Payment Processing - INLINE */}
+              {/* Payment Processing Fee */}
               {rules?.payment_processing?.enabled && (
                 <div className="p-4 border rounded-lg bg-white">
                   <div className="flex items-center justify-between mb-3">
@@ -669,9 +698,7 @@ export default function PaymentPlanWizard() {
                       <CreditCard className="w-4 h-4 text-gray-500" />
                       <Label className="font-medium">Payment Processing Fee</Label>
                     </div>
-                    <Badge className={rules.payment_processing.approval === 'auto' ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}>
-                      {rules.payment_processing.approval === 'auto' ? <><ShieldCheck className="w-3 h-3 mr-1" />Auto-Approved</> : <><Lock className="w-3 h-3 mr-1" />{rules.payment_processing.approval}</>}
-                    </Badge>
+                    <Badge className="bg-green-100 text-green-700"><ShieldCheck className="w-3 h-3 mr-1" />Auto-Approved</Badge>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
@@ -679,19 +706,20 @@ export default function PaymentPlanWizard() {
                       <p className="font-semibold">${fees.payment_processing.toFixed(2)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Waive Amount (max {rules.payment_processing.max_percent}%)</p>
+                      <p className="text-xs text-gray-500">Waive Amount (max ${rules.payment_processing.max_amount})</p>
                       <div className="relative">
                         <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                         <input 
                           type="number" 
                           min={0}
-                          max={fees.payment_processing * rules.payment_processing.max_percent / 100}
+                          max={rules.payment_processing.max_amount}
                           step={0.01}
                           value={waivers.payment_processing}
-                          onChange={(e) => handleWaiverChange('payment_processing', e.target.value, fees.payment_processing, rules.payment_processing.max_percent)}
+                          onChange={(e) => handleWaiverChange('payment_processing', e.target.value, fees.payment_processing, rules.payment_processing.max_amount)}
                           className="w-full pl-6 h-8 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
+                      <p className="text-xs text-gray-400 mt-1">Min collect: ${(fees.payment_processing - rules.payment_processing.max_amount).toFixed(2)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Final Amount</p>
@@ -709,51 +737,53 @@ export default function PaymentPlanWizard() {
                         <option value="">Select reason...</option>
                         <option value="hardship">Financial Hardship</option>
                         <option value="goodwill">Goodwill Adjustment</option>
-                        <option value="error">Billing Error</option>
-                        <option value="retention">Customer Retention</option>
                         <option value="negotiation">Settlement Negotiation</option>
+                        <option value="retention">Customer Retention</option>
                       </select>
                     </div>
                   )}
                 </div>
               )}
               
-              {/* File Processing - INLINE */}
-              {rules?.file_processing?.enabled && (
+              {/* Late Fees Waiver */}
+              {rules?.late_fees?.enabled && fees.late_fees.length > 0 && (
                 <div className="p-4 border rounded-lg bg-white">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-gray-500" />
-                      <Label className="font-medium">Collection File Processing Fee</Label>
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      <Label className="font-medium">Late Fees</Label>
                     </div>
-                    <Badge className={rules.file_processing.approval === 'auto' ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}>
-                      {rules.file_processing.approval === 'auto' ? <><ShieldCheck className="w-3 h-3 mr-1" />Auto-Approved</> : <><Lock className="w-3 h-3 mr-1" />{rules.file_processing.approval}</>}
+                    <Badge className="bg-yellow-100 text-yellow-700">
+                      Max waivable: {rules.late_fees.max_count === 99 ? 'All' : rules.late_fees.max_count} fee(s)
                     </Badge>
                   </div>
+                  <p className="text-xs text-orange-600 mb-2">Waiving late fees reduces your 20% commission base!</p>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-xs text-gray-500">Original</p>
-                      <p className="font-semibold">${fees.file_processing.toFixed(2)}</p>
+                      <p className="text-xs text-gray-500">Total Late Fees</p>
+                      <p className="font-semibold">${totalLateFees().toFixed(2)}</p>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {fees.late_fees.map((lf, i) => <div key={i}>{lf.label}: ${lf.amount.toFixed(2)}</div>)}
+                      </div>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Waive Amount (max {rules.file_processing.max_percent}%)</p>
+                      <p className="text-xs text-gray-500">Waive Amount</p>
                       <div className="relative">
                         <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                         <input 
                           type="number" 
                           min={0}
-                          max={fees.file_processing * rules.file_processing.max_percent / 100}
+                          max={totalLateFees()}
                           step={0.01}
                           value={waivers.file_processing}
-                          onChange={(e) => handleWaiverChange('file_processing', e.target.value, fees.file_processing, rules.file_processing.max_percent, rules.file_processing.min_collect)}
+                          onChange={(e) => handleWaiverChange('file_processing', e.target.value, totalLateFees(), totalLateFees())}
                           className="w-full pl-6 h-8 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
-                      {rules.file_processing.min_collect > 0 && <p className="text-xs text-orange-600 mt-1">Min collect: ${rules.file_processing.min_collect}</p>}
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Final Amount</p>
-                      <p className="font-semibold text-lg">${(fees.file_processing - waivers.file_processing).toFixed(2)}</p>
+                      <p className="text-xs text-gray-500">Late Fees Kept</p>
+                      <p className="font-semibold text-lg">${(totalLateFees() - waivers.file_processing).toFixed(2)}</p>
                     </div>
                   </div>
                   {waivers.file_processing > 0 && (
@@ -767,9 +797,8 @@ export default function PaymentPlanWizard() {
                         <option value="">Select reason...</option>
                         <option value="hardship">Financial Hardship</option>
                         <option value="goodwill">Goodwill Adjustment</option>
-                        <option value="error">Billing Error</option>
-                        <option value="retention">Customer Retention</option>
                         <option value="negotiation">Settlement Negotiation</option>
+                        <option value="retention">Customer Retention</option>
                       </select>
                     </div>
                   )}
@@ -857,9 +886,9 @@ export default function PaymentPlanWizard() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="p-4 bg-gray-50 rounded-lg text-center">
-              <p className="text-sm text-gray-500">Settlement Amount</p>
+              <p className="text-sm text-gray-500">Total Amount Due</p>
               <p className="text-3xl font-bold">${calculateAdjustedTotal().toFixed(2)}</p>
-              <p className="text-sm text-green-600">({tier.label} {customerType === 'full' ? tier.fullPayDiscount : tier.planDiscount}% discount applied)</p>
+              <p className="text-sm text-gray-500">{tier.label} - {tier.name}</p>
             </div>
 
             {customerType === 'plan' ? (
@@ -926,10 +955,9 @@ export default function PaymentPlanWizard() {
                 <p className="text-sm text-gray-500">{account.client_email} • {account.client_phone}</p>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-3 bg-gray-50 rounded-lg"><p className="text-xs text-gray-500">Original Balance</p><p className="text-lg font-bold">${account.past_due_balance?.toFixed(2)}</p></div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="p-3 bg-gray-50 rounded-lg"><p className="text-xs text-gray-500">Total Amount</p><p className="text-lg font-bold">${calculateAdjustedTotal().toFixed(2)}</p></div>
                 <div className="p-3 bg-gray-50 rounded-lg"><p className="text-xs text-gray-500">Waivers Applied</p><p className="text-lg font-bold text-green-600">-${calculateTotalWaived().toFixed(2)}</p></div>
-                <div className="p-3 bg-gray-50 rounded-lg"><p className="text-xs text-gray-500">Tier Discount</p><p className="text-lg font-bold text-green-600">-${calculateTierDiscount().toFixed(2)}</p></div>
                 <div className="p-3 bg-green-50 rounded-lg border border-green-200"><p className="text-xs text-gray-500">Settlement Amount</p><p className="text-lg font-bold">${calculateAdjustedTotal().toFixed(2)}</p></div>
               </div>
               
@@ -940,7 +968,7 @@ export default function PaymentPlanWizard() {
                   <div className="space-y-1 text-sm">
                     {waivers.collection_fee > 0 && <p>• Collection Fee: -${waivers.collection_fee.toFixed(2)} ({waivers.collection_fee_reason})</p>}
                     {waivers.payment_processing > 0 && <p>• Payment Processing: -${waivers.payment_processing.toFixed(2)} ({waivers.payment_processing_reason})</p>}
-                    {waivers.file_processing > 0 && <p>• File Processing: -${waivers.file_processing.toFixed(2)} ({waivers.file_processing_reason})</p>}
+                    {waivers.file_processing > 0 && <p>• Late Fees Waived: -${waivers.file_processing.toFixed(2)} ({waivers.file_processing_reason})</p>}
                   </div>
                 </div>
               )}
@@ -969,40 +997,28 @@ export default function PaymentPlanWizard() {
           {commission && (
             <Card className="border-l-4 border-l-green-500">
               <CardHeader><CardTitle className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-green-600" />Your Commission Preview</CardTitle></CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="p-3 bg-green-50 rounded-lg">
-                    <p className="text-xs text-gray-500">Collection Fee (100% yours)</p>
+                    <p className="text-xs text-gray-500">Collection Fee (yours)</p>
                     <p className="text-xl font-bold text-green-600">${commission.collectionFee.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400">{commission.collectionFeeNote}</p>
                   </div>
-                  {customerType === 'full' ? (
-                    <>
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs text-gray-500">Base Commission ({commission.baseRate}%)</p>
-                        <p className="text-xl font-bold">${commission.baseCommission.toFixed(2)}</p>
-                      </div>
-                      <div className="p-3 bg-green-100 rounded-lg border border-green-300 col-span-2">
-                        <p className="text-xs text-gray-500">Total Earnings</p>
-                        <p className="text-2xl font-bold text-green-700">${commission.total.toFixed(2)}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs text-gray-500">Immediate (Down {commission.downRate}%)</p>
-                        <p className="text-xl font-bold">${commission.immediate.toFixed(2)}</p>
-                      </div>
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs text-gray-500">Monthly + Completion</p>
-                        <p className="text-xl font-bold">${(commission.monthly + commission.completion).toFixed(2)}</p>
-                      </div>
-                      <div className="p-3 bg-green-100 rounded-lg border border-green-300">
-                        <p className="text-xs text-gray-500">Total Potential</p>
-                        <p className="text-2xl font-bold text-green-700">${commission.totalPotential.toFixed(2)}</p>
-                      </div>
-                    </>
-                  )}
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs text-gray-500">{commission.baseRate}% Commission</p>
+                    <p className="text-xl font-bold">${commission.baseCommission.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400">On ${commission.commissionBase?.toFixed(2)} base</p>
+                  </div>
+                  <div className="p-3 bg-green-100 rounded-lg border border-green-300">
+                    <p className="text-xs text-gray-500">{customerType === 'full' ? 'Total Earnings' : 'Total Potential'}</p>
+                    <p className="text-2xl font-bold text-green-700">${(customerType === 'full' ? commission.total : commission.totalPotential).toFixed(2)}</p>
+                  </div>
                 </div>
+                {customerType === 'plan' && (
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 text-sm text-blue-700">
+                    <strong>Payment Plan Rules:</strong> {commission.thresholdNote}. Collection fee of ${commission.collectionFee.toFixed(2)} is paid immediately.
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

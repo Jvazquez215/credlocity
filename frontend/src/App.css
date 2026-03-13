@@ -39,3 +39,75 @@ button:hover {
 a {
   transition: color 0.2s ease;
 }
+
+
+/* TipTap Editor Styles */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9CA3AF;
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  overflow: hidden;
+  width: 100%;
+}
+.ProseMirror table td,
+.ProseMirror table th {
+  border: 1px solid #D1D5DB;
+  padding: 0.5rem 0.75rem;
+  min-width: 80px;
+  vertical-align: top;
+  position: relative;
+}
+.ProseMirror table th {
+  background-color: #F3F4F6;
+  font-weight: 600;
+}
+.ProseMirror table .selectedCell {
+  background-color: #DBEAFE;
+}
+.ProseMirror blockquote {
+  border-left: 3px solid #D1D5DB;
+  padding-left: 1rem;
+  color: #6B7280;
+}
+.ProseMirror pre {
+  background-color: #1F2937;
+  color: #E5E7EB;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+.ProseMirror pre code {
+  color: inherit;
+  background: none;
+  padding: 0;
+  font-size: 0.875rem;
+}
+.ProseMirror code {
+  background-color: #F3F4F6;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  color: #DC2626;
+}
+.ProseMirror hr {
+  border: none;
+  border-top: 2px solid #E5E7EB;
+  margin: 1.5rem 0;
+}
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+.ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid #3B82F6;
+  border-radius: 0.5rem;
+}

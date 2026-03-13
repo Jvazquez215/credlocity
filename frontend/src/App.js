@@ -63,6 +63,33 @@ import CreditRepairReviews from "./pages/CreditRepairReviews";
 import ReviewDetailPage from "./pages/ReviewDetailPage";
 import ClientReviewFormEnhanced from "./pages/ClientReviewFormEnhanced";
 
+// Missing Pages - Header Navigation
+import HowItWorks from "./pages/HowItWorks";
+import FreeTrialPage from "./pages/FreeTrialPage";
+import FraudRemoval from "./pages/credit-issues/FraudRemoval";
+import HumanTraffickingBlock from "./pages/credit-issues/HumanTraffickingBlock";
+import CreditRepairScams from "./pages/CreditRepairScams";
+import CreditTrackerApp from "./pages/CreditTrackerApp";
+
+// Education Pages
+import EducationHub from "./pages/education/EducationHub";
+import CreditBuilding from "./pages/education/CreditBuilding";
+import CreditReports from "./pages/education/CreditReports";
+import RepairMethods from "./pages/education/RepairMethods";
+import DebtManagement from "./pages/education/DebtManagement";
+import FinancialWellness from "./pages/education/FinancialWellness";
+import FCRAGuide from "./pages/education/FCRAGuide";
+import FDCPAGuide from "./pages/education/FDCPAGuide";
+import CROAGuide from "./pages/education/CROAGuide";
+import TSRCompliance from "./pages/education/TSRCompliance";
+import FCRA605B from "./pages/education/FCRA605B";
+
+// Competitor Comparisons
+import CompetitorComparison from "./pages/comparisons/CompetitorComparison";
+
+// Calculator Tools
+import CalculatorPage from "./pages/tools/CalculatorPage";
+
 // Admin Pages  
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -438,6 +465,52 @@ function App() {
               path="/outsourcing/reviews/:slug"
               element={<OutsourcingReviewDetail />}
             />
+
+            {/* Header Navigation Pages */}
+            <Route path="/how-it-works" element={<><Header /><HowItWorks /><Footer /></>} />
+            <Route path="/30-day-free-trial" element={<><Header /><FreeTrialPage /><Footer /></>} />
+            <Route path="/fraud-removal" element={<><Header /><FraudRemoval /><Footer /></>} />
+            <Route path="/human-trafficking-credit-block" element={<><Header /><HumanTraffickingBlock /><Footer /></>} />
+            <Route path="/credit-repair-scams" element={<><Header /><CreditRepairScams /><Footer /></>} />
+            <Route path="/credit-tracker-app" element={<><Header /><CreditTrackerApp /><Footer /></>} />
+
+            {/* Education Pages */}
+            <Route path="/education-hub" element={<><Header /><EducationHub /><Footer /></>} />
+            <Route path="/credit-building" element={<><Header /><CreditBuilding /><Footer /></>} />
+            <Route path="/credit-reports" element={<><Header /><CreditReports /><Footer /></>} />
+            <Route path="/repair-methods" element={<><Header /><RepairMethods /><Footer /></>} />
+            <Route path="/debt-management" element={<><Header /><DebtManagement /><Footer /></>} />
+            <Route path="/financial-wellness" element={<><Header /><FinancialWellness /><Footer /></>} />
+            <Route path="/fcra-guide" element={<><Header /><FCRAGuide /><Footer /></>} />
+            <Route path="/fdcpa-guide" element={<><Header /><FDCPAGuide /><Footer /></>} />
+            <Route path="/croa-guide" element={<><Header /><CROAGuide /><Footer /></>} />
+            <Route path="/tsr-compliance" element={<><Header /><TSRCompliance /><Footer /></>} />
+            <Route path="/fcra-605b-block" element={<><Header /><FCRA605B /><Footer /></>} />
+
+            {/* Competitor Comparisons */}
+            <Route path="/vs-lexington-law" element={<><Header /><CompetitorComparison competitor="lexington-law" /><Footer /></>} />
+            <Route path="/vs-creditrepair" element={<><Header /><CompetitorComparison competitor="creditrepair-com" /><Footer /></>} />
+            <Route path="/vs-credit-people" element={<><Header /><CompetitorComparison competitor="credit-people" /><Footer /></>} />
+            <Route path="/vs-credit-pros" element={<><Header /><CompetitorComparison competitor="credit-pros" /><Footer /></>} />
+            <Route path="/vs-credit-saint" element={<><Header /><CompetitorComparison competitor="credit-saint" /><Footer /></>} />
+            <Route path="/vs-white-jacobs" element={<><Header /><CompetitorComparison competitor="white-jacobs" /><Footer /></>} />
+
+            {/* Calculator Tools */}
+            <Route path="/tools/credit-score-calculator" element={<><Header /><CalculatorPage type="credit-score" /><Footer /></>} />
+            <Route path="/tools/debt-to-income-calculator" element={<><Header /><CalculatorPage type="debt-to-income" /><Footer /></>} />
+            <Route path="/tools/credit-utilization-calculator" element={<><Header /><CalculatorPage type="credit-utilization" /><Footer /></>} />
+            <Route path="/tools/loan-payment-calculator" element={<><Header /><CalculatorPage type="loan-payment" /><Footer /></>} />
+            <Route path="/tools/debt-payoff-calculator" element={<><Header /><CalculatorPage type="debt-payoff" /><Footer /></>} />
+            <Route path="/tools/mortgage-calculator" element={<><Header /><CalculatorPage type="mortgage" /><Footer /></>} />
+            <Route path="/tools/credit-card-payoff-calculator" element={<><Header /><CalculatorPage type="credit-card-payoff" /><Footer /></>} />
+            <Route path="/tools/savings-calculator" element={<><Header /><CalculatorPage type="savings" /><Footer /></>} />
+            <Route path="/tools/interest-calculator" element={<><Header /><CalculatorPage type="interest" /><Footer /></>} />
+            <Route path="/tools/budget-calculator" element={<><Header /><CalculatorPage type="budget" /><Footer /></>} />
+            <Route path="/tools/refinance-calculator" element={<><Header /><CalculatorPage type="refinance" /><Footer /></>} />
+            <Route path="/tools/student-loan-calculator" element={<><Header /><CalculatorPage type="student-loan" /><Footer /></>} />
+            <Route path="/tools/auto-loan-calculator" element={<><Header /><CalculatorPage type="auto-loan" /><Footer /></>} />
+            <Route path="/tools/retirement-calculator" element={<><Header /><CalculatorPage type="retirement" /><Footer /></>} />
+
             </Routes>
             <Toaster />
             

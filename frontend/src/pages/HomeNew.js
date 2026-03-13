@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
 import { useCountUp, formatNumber } from '../hooks/useCountUp';
+import { useTranslation } from '../context/TranslationContext';
 
 // Lazy load image component for performance
 const LazyImage = memo(({ src, alt, className, ...props }) => {
@@ -54,6 +55,7 @@ const LazyImage = memo(({ src, alt, className, ...props }) => {
 const HomeNew = () => {
   const [openFaq, setOpenFaq] = useState(null);
   const [parallaxOffset, setParallaxOffset] = useState(0);
+  const { t } = useTranslation();
 
   // Throttled parallax effect for better performance
   useEffect(() => {
@@ -187,13 +189,13 @@ const HomeNew = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="font-cinzel text-4xl sm:text-5xl md:text-6xl font-bold mb-4 animate-fade-in">
-              CREDIT REPAIR DONE RIGHT
+              {t('home.hero_title')}
             </h1>
             <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-gray-100">
-              Remove Negative Items, Collections & Late Payments From Your Credit Report
+              {t('home.hero_subtitle')}
             </h2>
             <p className="text-lg md:text-xl mb-8 text-gray-100 max-w-3xl mx-auto">
-              Professional credit repair services helping you improve your credit score and achieve financial freedom. Serving clients nationwide since 2008.
+              {t('home.hero_desc')}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -207,7 +209,7 @@ const HomeNew = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Start Your Free 30-Day Trial
+                  {t('home.start_free_trial')}
                 </a>
               </Button>
               <Button 
@@ -221,7 +223,7 @@ const HomeNew = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Book Free Consultation
+                  {t('home.book_consultation')}
                 </a>
               </Button>
             </div>
@@ -234,26 +236,26 @@ const HomeNew = () => {
                     <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                   ))}
                 </div>
-                <p className="font-semibold text-white">5.0 Rating</p>
-                <p className="text-sm text-gray-200">Yelp Reviews</p>
+                <p className="font-semibold text-white">{t('home.rating')}</p>
+                <p className="text-sm text-gray-200">{t('home.yelp_reviews')}</p>
               </TrustBadge>
               
               <TrustBadge delay={100}>
                 <div className="text-3xl font-bold mb-2">0</div>
-                <p className="font-semibold text-white">BBB Complaints</p>
-                <p className="text-sm text-gray-200">Last 3 Years</p>
+                <p className="font-semibold text-white">{t('home.bbb_complaints')}</p>
+                <p className="text-sm text-gray-200">{t('home.last_3_years')}</p>
               </TrustBadge>
               
               <TrustBadge delay={200}>
                 <div className="text-3xl font-bold mb-2">30</div>
-                <p className="font-semibold text-white">Day Free Trial</p>
-                <p className="text-sm text-gray-200">Longest in Industry</p>
+                <p className="font-semibold text-white">{t('home.day_free_trial')}</p>
+                <p className="text-sm text-gray-200">{t('home.longest_industry')}</p>
               </TrustBadge>
               
               <TrustBadge delay={300}>
                 <div className="text-3xl font-bold mb-2">$0</div>
-                <p className="font-semibold text-white">First Work Fee</p>
-                <p className="text-sm text-gray-200">No Upfront Costs</p>
+                <p className="font-semibold text-white">{t('home.first_work_fee')}</p>
+                <p className="text-sm text-gray-200">{t('home.no_upfront')}</p>
               </TrustBadge>
             </div>
           </div>
@@ -261,34 +263,34 @@ const HomeNew = () => {
       </section>
 
       {/* SECTION 2: HOW CREDIT REPAIR WORKS */}
-      <HowCreditRepairWorks />
+      <HowCreditRepairWorks t={t} />
 
       {/* SECTION 3: WHY CHOOSE CREDLOCITY */}
-      <WhyChooseCredlocity />
+      <WhyChooseCredlocity t={t} />
 
       {/* SECTION 4: ANIMATED STATISTICS */}
-      <AnimatedStatistics />
+      <AnimatedStatistics t={t} />
 
       {/* SECTION 5: 30-DAY FREE TRIAL OFFER */}
-      <FreeTrialSection />
+      <FreeTrialSection t={t} />
 
       {/* SECTION 6: CREDIT ISSUES WE FIX */}
-      <CreditIssuesSection />
+      <CreditIssuesSection t={t} />
 
       {/* SECTION 7: OUR PROVEN 6-STEP PROCESS */}
-      <SixStepProcess />
+      <SixStepProcess t={t} />
 
       {/* SECTION 8: REAL RESULTS FROM REAL CLIENTS */}
-      <TestimonialsSection />
+      <TestimonialsSection t={t} />
 
       {/* SECTION 9: LOCAL SEO SECTION */}
-      <LocalSEOSection />
+      <LocalSEOSection t={t} />
 
       {/* SECTION 10: FAQ SECTION */}
-      <FAQSection openFaq={openFaq} setOpenFaq={setOpenFaq} />
+      <FAQSection openFaq={openFaq} setOpenFaq={setOpenFaq} t={t} />
 
       {/* SECTION 11: FINAL CTA */}
-      <FinalCTA />
+      <FinalCTA t={t} />
       </div>
     </>
   );
@@ -312,42 +314,42 @@ const TrustBadge = ({ children, delay }) => {
 };
 
 // SECTION 2: HOW CREDIT REPAIR WORKS
-const HowCreditRepairWorks = () => {
+const HowCreditRepairWorks = ({ t }) => {
   const [ref, isInView] = useInView({ once: true, threshold: 0.1 });
 
   const steps = [
     {
       number: 1,
-      title: "Step 1: Obtain Your Credit Reports",
-      content: "Get free copies from AnnualCreditReport.com or through Experian, Equifax, and TransUnion. Review all three reports carefully for errors, outdated information, and inaccurate negative items."
+      title: t('home.step1_title'),
+      content: t('home.step1_desc')
     },
     {
       number: 2,
-      title: "Step 2: Identify Disputable Items",
-      content: "Look for:",
+      title: t('home.step2_title'),
+      content: t('home.step2_desc'),
       bullets: [
-        "Accounts you don't recognize",
-        "Incorrect late payment dates",
-        "Collections beyond the 7-year reporting period",
-        "Duplicate accounts",
-        "Incorrect balances or credit limits",
-        "Identity theft items"
+        t('home.step2_b1'),
+        t('home.step2_b2'),
+        t('home.step2_b3'),
+        t('home.step2_b4'),
+        t('home.step2_b5'),
+        t('home.step2_b6')
       ]
     },
     {
       number: 3,
-      title: "Step 3: File Disputes Under FCRA",
-      content: "The Fair Credit Reporting Act (FCRA) gives you the right to dispute any inaccurate, incomplete, or unverifiable information. Credit bureaus must investigate within 30 days."
+      title: t('home.step3_title'),
+      content: t('home.step3_desc')
     },
     {
       number: 4,
-      title: "Step 4: Challenge Unverified Items",
-      content: "If creditors can't verify the disputed information, the credit bureau must remove it. Professional credit repair companies use advanced strategies including Metro2 compliance checks and FCRA violation identification."
+      title: t('home.step4_title'),
+      content: t('home.step4_desc')
     },
     {
       number: 5,
-      title: "Step 5: Monitor Progress",
-      content: "Track your credit score changes monthly. Most people see improvements within 60-90 days of starting the dispute process."
+      title: t('home.step5_title'),
+      content: t('home.step5_desc')
     }
   ];
 
@@ -358,10 +360,10 @@ const HowCreditRepairWorks = () => {
           isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-primary-blue mb-4">
-            How to Repair Your Credit: The Complete Process
+            {t('home.how_title')}
           </h2>
           <p className="text-base md:text-lg text-gray-700 max-w-4xl mx-auto leading-relaxed">
-            Over 79,000 Americans have improved their credit scores using proven credit repair strategies. Whether you repair your credit yourself or work with professionals, understanding the process is essential. Here's everything you need to know about legally removing negative items, improving your credit score, and achieving financial freedom.
+            {t('home.how_desc')}
           </p>
         </div>
 
@@ -376,18 +378,18 @@ const HowCreditRepairWorks = () => {
           isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <h3 className="font-cinzel text-2xl font-bold text-primary-blue mb-4">
-            When to Consider Professional Credit Repair
+            {t('home.professional_title')}
           </h3>
           <p className="text-gray-700 mb-4">
-            While you can repair credit yourself, professional credit repair services save time and often achieve better results through:
+            {t('home.professional_desc')}
           </p>
           <ul className="space-y-3 mb-6">
             {[
-              "Advanced dispute strategies you can't access as a consumer",
-              "Legal expertise in FCRA, FDCPA, and FCBA violations",
-              "Creditor negotiations and pay-for-delete arrangements",
-              "Bureau challenges using technical Metro2 compliance issues",
-              "Litigation support for FCRA violations"
+              t('home.pro_b1'),
+              t('home.pro_b2'),
+              t('home.pro_b3'),
+              t('home.pro_b4'),
+              t('home.pro_b5')
             ].map((item, i) => (
               <li key={i} className="flex items-start">
                 <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
@@ -400,7 +402,7 @@ const HowCreditRepairWorks = () => {
             asChild
           >
             <Link to="/plans-pricing">
-              Get Professional Help <ArrowRight className="w-4 h-4 ml-2" />
+              {t('home.get_professional_help')} <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
         </div>
@@ -455,40 +457,15 @@ const StepCard = ({ step, index, isInView }) => (
 );
 
 // SECTION 3: WHY CHOOSE CREDLOCITY
-const WhyChooseCredlocity = () => {
+const WhyChooseCredlocity = ({ t }) => {
   const [ref, isInView] = useInView({ once: true, threshold: 0.1 });
 
   const features = [
-    {
-      icon: Zap,
-      title: "Advanced AI Technology",
-      description: "Our proprietary AI analyzes your credit reports using Metro2 compliance standards and creates personalized dispute strategies targeting FCRA, FDCPA, and FCBA violations for maximum effectiveness.",
-      color: "blue"
-    },
-    {
-      icon: Shield,
-      title: "TSR Compliant Process",
-      description: "100% compliant with federal regulations. No phone enrollment, secure online platform only.",
-      color: "green"
-    },
-    {
-      icon: Users,
-      title: "Hispanic-Owned Business",
-      description: "Founded by CEO Joeziel Vazquez in Philadelphia, serving diverse communities across all 50 states.",
-      color: "blue"
-    },
-    {
-      icon: Award,
-      title: "Proven Track Record",
-      description: "16+ years experience, A+ BBB rating, zero complaints, and thousands of success stories.",
-      color: "green"
-    },
-    {
-      icon: BadgeCheck,
-      title: "Certified Credit Experts",
-      description: "Board Certified Credit Consultant (BCCC), Certified Credit Score Consultant (CCSC), and FCRA Certified professionals with 16+ years of experience.",
-      color: "blue"
-    }
+    { icon: Zap, title: t('home.feat_ai_title'), description: t('home.feat_ai_desc'), color: "blue" },
+    { icon: Shield, title: t('home.feat_tsr_title'), description: t('home.feat_tsr_desc'), color: "green" },
+    { icon: Users, title: t('home.feat_hispanic_title'), description: t('home.feat_hispanic_desc'), color: "blue" },
+    { icon: Award, title: t('home.feat_proven_title'), description: t('home.feat_proven_desc'), color: "green" },
+    { icon: BadgeCheck, title: t('home.feat_certified_title'), description: t('home.feat_certified_desc'), color: "blue" }
   ];
 
   return (
@@ -498,10 +475,10 @@ const WhyChooseCredlocity = () => {
           isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-primary-blue mb-4">
-            Why Choose Credlocity Over Other Credit Repair Companies
+            {t('home.why_title')}
           </h2>
           <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
-            Not all credit repair companies are created equal. Here's what makes us different from Lexington Law, Credit Saint, The Credit People, and other competitors.
+            {t('home.why_desc')}
           </p>
         </div>
 
@@ -515,7 +492,7 @@ const WhyChooseCredlocity = () => {
           isInView ? 'opacity-100' : 'opacity-0'
         }`}>
           <p>
-            Compare us to competitors:{' '}
+            {t('home.compare')}{' '}
             <Link to="/credlocity-vs-lexington-law" className="text-primary-blue hover:underline">Credlocity vs. Lexington Law</Link>
             {', '}
             <Link to="/credlocity-vs-credit-saint" className="text-primary-blue hover:underline">Credit Saint</Link>
@@ -554,7 +531,7 @@ const FeatureCard = ({ feature, index, isInView }) => {
 };
 
 // SECTION 4: ANIMATED STATISTICS
-const AnimatedStatistics = () => {
+const AnimatedStatistics = ({ t }) => {
   const [hasStarted, setHasStarted] = useState(false);
   const sectionRef = useRef(null);
   
@@ -590,21 +567,21 @@ const AnimatedStatistics = () => {
         <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
           <StatBox 
             count={count1} 
-            label="Years of Experience" 
+            label={t('home.years_exp')} 
             isInView={hasStarted}
             delay={0}
             suffix=""
           />
           <StatBox 
             count={count2} 
-            label="Users" 
+            label={t('home.users')} 
             isInView={hasStarted}
             delay={100}
             format="K"
           />
           <StatBox 
             count={count3} 
-            label="Deleted Debt" 
+            label={t('home.deleted_debt')} 
             isInView={hasStarted}
             delay={200}
             format="M"
@@ -634,7 +611,7 @@ const StatBox = ({ count, label, isInView, delay, format, suffix = "" }) => {
 };
 
 // SECTION 5: 30-DAY FREE TRIAL OFFER
-const FreeTrialSection = () => {
+const FreeTrialSection = ({ t }) => {
   const [ref, isInView] = useInView({ once: true, threshold: 0.1 });
 
   return (
@@ -644,18 +621,18 @@ const FreeTrialSection = () => {
           isInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold mb-4 text-center">
-            30-Day Free Trial
+            {t('home.trial_title')}
           </h2>
           <p className="text-lg md:text-xl mb-8 text-center text-gray-100">
-            Experience our service risk-free with our comprehensive guarantee package
+            {t('home.trial_desc')}
           </p>
           
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             {[
-              "$0 due today - start immediately",
-              "180-day money-back guarantee",
-              "Cancel anytime, no long-term contracts",
-              "Free Credit Tracker app included"
+              t('home.trial_b1'),
+              t('home.trial_b2'),
+              t('home.trial_b3'),
+              t('home.trial_b4')
             ].map((benefit, i) => (
               <div key={i} className="flex items-start space-x-3">
                 <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-1" />
@@ -665,7 +642,7 @@ const FreeTrialSection = () => {
           </div>
 
           <p className="text-sm text-gray-100 mb-6 text-center">
-            *You will pay for your credit report ($49.95) once you meet your assigned credit repair agent. Credit card information required but not charged for service fee for 30 days.
+            {t('home.trial_disclaimer')}
           </p>
 
           <div className="text-center mb-8">
@@ -679,53 +656,53 @@ const FreeTrialSection = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Start Your Free Trial
+                {t('home.start_trial')}
               </a>
             </Button>
           </div>
 
           {/* Required Services */}
           <div className="border-t border-white/20 pt-8">
-            <h3 className="font-cinzel text-2xl font-bold mb-6 text-center">Required Services</h3>
+            <h3 className="font-cinzel text-2xl font-bold mb-6 text-center">{t('home.required_services')}</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                <h4 className="font-semibold text-xl mb-2">Credit Report Analysis</h4>
+                <h4 className="font-semibold text-xl mb-2">{t('home.credit_analysis')}</h4>
                 <div className="text-3xl font-bold mb-3">$49.95</div>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start">
                     <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Comprehensive review of all three credit reports</span>
+                    <span>{t('home.analysis_b1')}</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Full Experian, Equifax & TransUnion review</span>
+                    <span>{t('home.analysis_b2')}</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Identification of all negative items</span>
+                    <span>{t('home.analysis_b3')}</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Personalized action plan</span>
+                    <span>{t('home.analysis_b4')}</span>
                   </li>
                 </ul>
               </div>
 
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                <h4 className="font-semibold text-xl mb-2">Power of Attorney (E-Notary)</h4>
+                <h4 className="font-semibold text-xl mb-2">{t('home.poa_title')}</h4>
                 <div className="text-3xl font-bold mb-3">$39.95</div>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start">
                     <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Electronic notarization included</span>
+                    <span>{t('home.poa_b1')}</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Legal authority to dispute on your behalf</span>
+                    <span>{t('home.poa_b2')}</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Required for bureau communications</span>
+                    <span>{t('home.poa_b3')}</span>
                   </li>
                 </ul>
               </div>
@@ -738,82 +715,16 @@ const FreeTrialSection = () => {
 };
 
 // SECTION 6: CREDIT ISSUES WE FIX
-const CreditIssuesSection = () => {
+const CreditIssuesSection = ({ t }) => {
   const [ref, isInView] = useInView({ once: true, threshold: 0.05 });
 
   const creditIssues = [
-    {
-      icon: TrendingDown,
-      title: "Collection Removal",
-      description: "Remove collection accounts using FDCPA violations, validation disputes, and pay-for-delete negotiations. Collections can drop your score 50-100 points—we remove them permanently.",
-      stats: [
-        "Average: -80 points per collection",
-        "Stay on report: 7 years",
-        "Success rate: 73%"
-      ],
-      link: "/collection-removal",
-      color: "red"
-    },
-    {
-      icon: Clock,
-      title: "Late Payment Removal",
-      description: "Remove late payments through goodwill letters, FCBA disputes, and Metro2 compliance challenges. Even one 30-day late can cost you 60-110 points.",
-      stats: [
-        "Average: -90 points per late",
-        "Stay on report: 7 years",
-        "Success rate: 68%"
-      ],
-      link: "/late-payment-removal",
-      color: "orange"
-    },
-    {
-      icon: FileText,
-      title: "Charge-Off Removal",
-      description: "Remove charge-offs using verification disputes, account validation, and creditor negotiations. Charge-offs signal severe delinquency to lenders.",
-      stats: [
-        "Average: -110 points",
-        "Stay on report: 7 years",
-        "Success rate: 71%"
-      ],
-      link: "/charge-off-removal",
-      color: "red"
-    },
-    {
-      icon: Scale,
-      title: "Bankruptcy Removal",
-      description: "Challenge bankruptcy reporting errors and rebuild credit after Chapter 7 or Chapter 13. While bankruptcies are difficult to remove, errors in reporting are common.",
-      stats: [
-        "Average: -200+ points",
-        "Stay on report: 7-10 years",
-        "Success rate: 34%"
-      ],
-      link: "/bankruptcy-credit-repair",
-      color: "purple"
-    },
-    {
-      icon: ShieldCheck,
-      title: "Identity Theft Resolution",
-      description: "Expert FCRA 605B credit block process for fraud victims. Remove fraudulent accounts and restore your credit using specialized identity theft procedures.",
-      stats: [
-        "Affects: 15M Americans/year",
-        "Average damage: -150 points",
-        "Success rate: 89%"
-      ],
-      link: "/identity-theft-credit-repair",
-      color: "blue"
-    },
-    {
-      icon: Target,
-      title: "Hard Inquiry Removal",
-      description: "Remove unauthorized hard inquiries that weren't approved by you. Each inquiry can cost 5-10 points, and multiple inquiries compound the damage.",
-      stats: [
-        "Average: -5 points each",
-        "Stay on report: 2 years",
-        "Success rate: 62%"
-      ],
-      link: "/hard-inquiry-removal",
-      color: "indigo"
-    }
+    { icon: TrendingDown, title: t('home.issue_collection'), description: t('home.issue_collection_desc'), stats: ["Average: -80 points per collection", "Stay on report: 7 years", "Success rate: 73%"], link: "/collection-removal", color: "red" },
+    { icon: Clock, title: t('home.issue_late'), description: t('home.issue_late_desc'), stats: ["Average: -90 points per late", "Stay on report: 7 years", "Success rate: 68%"], link: "/late-payment-removal", color: "orange" },
+    { icon: FileText, title: t('home.issue_chargeoff'), description: t('home.issue_chargeoff_desc'), stats: ["Average: -110 points", "Stay on report: 7 years", "Success rate: 71%"], link: "/charge-off-removal", color: "red" },
+    { icon: Scale, title: t('home.issue_bankruptcy'), description: t('home.issue_bankruptcy_desc'), stats: ["Average: -200+ points", "Stay on report: 7-10 years", "Success rate: 34%"], link: "/bankruptcy-credit-repair", color: "purple" },
+    { icon: ShieldCheck, title: t('home.issue_identity'), description: t('home.issue_identity_desc'), stats: ["Affects: 15M Americans/year", "Average damage: -150 points", "Success rate: 89%"], link: "/identity-theft-credit-repair", color: "blue" },
+    { icon: Target, title: t('home.issue_inquiry'), description: t('home.issue_inquiry_desc'), stats: ["Average: -5 points each", "Stay on report: 2 years", "Success rate: 62%"], link: "/hard-inquiry-removal", color: "indigo" }
   ];
 
   return (
@@ -823,16 +734,16 @@ const CreditIssuesSection = () => {
           isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-primary-blue mb-4">
-            Credit Issues We Fix
+            {t('home.issues_title')}
           </h2>
           <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
-            Expert removal strategies for every type of negative item affecting your credit score.
+            {t('home.issues_desc')}
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {creditIssues.map((issue, index) => (
-            <CreditIssueCard key={index} issue={issue} index={index} isInView={isInView} />
+            <CreditIssueCard key={index} issue={issue} index={index} isInView={isInView} t={t} />
           ))}
         </div>
       </div>
@@ -840,7 +751,7 @@ const CreditIssuesSection = () => {
   );
 };
 
-const CreditIssueCard = ({ issue, index, isInView }) => {
+const CreditIssueCard = ({ issue, index, isInView, t }) => {
   const Icon = issue.icon;
   const colorClasses = {
     red: 'bg-red-100 text-red-600 border-red-200',
@@ -878,7 +789,7 @@ const CreditIssueCard = ({ issue, index, isInView }) => {
         asChild
       >
         <Link to={issue.link}>
-          Learn More 
+          {t('home.learn_more')} 
           <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
         </Link>
       </Button>
@@ -887,34 +798,16 @@ const CreditIssueCard = ({ issue, index, isInView }) => {
 };
 
 // SECTION 7: OUR PROVEN 6-STEP PROCESS
-const SixStepProcess = () => {
+const SixStepProcess = ({ t }) => {
   const [ref, isInView] = useInView({ once: true, threshold: 0.1 });
 
   const steps = [
-    {
-      title: "Free Credit Analysis",
-      description: "Complete credit report review to identify all negative items and opportunities for improvement."
-    },
-    {
-      title: "Custom Strategy",
-      description: "Personalized dispute strategy using advanced AI and Metro2 compliance techniques."
-    },
-    {
-      title: "Professional Disputes",
-      description: "Expert dispute letters sent to credit bureaus and creditors on your behalf."
-    },
-    {
-      title: "Bureau Challenges",
-      description: "Strategic challenges to all three credit bureaus using proven legal methods."
-    },
-    {
-      title: "Progress Tracking",
-      description: "Real-time updates via our Credit Tracker app showing your improving scores."
-    },
-    {
-      title: "Score Optimization",
-      description: "Ongoing optimization and credit building strategies for long-term success."
-    }
+    { title: t('home.ps1_title'), description: t('home.ps1_desc') },
+    { title: t('home.ps2_title'), description: t('home.ps2_desc') },
+    { title: t('home.ps3_title'), description: t('home.ps3_desc') },
+    { title: t('home.ps4_title'), description: t('home.ps4_desc') },
+    { title: t('home.ps5_title'), description: t('home.ps5_desc') },
+    { title: t('home.ps6_title'), description: t('home.ps6_desc') }
   ];
 
   return (
@@ -924,10 +817,10 @@ const SixStepProcess = () => {
           isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-primary-blue mb-4">
-            Our Proven 6-Step Process
+            {t('home.process_title')}
           </h2>
           <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
-            We've perfected our credit repair process over 16+ years to deliver maximum results for our clients.
+            {t('home.process_desc')}
           </p>
         </div>
 
@@ -966,7 +859,7 @@ const ProcessStep = ({ step, index, isInView, isLast }) => (
 );
 
 // SECTION 8: REAL RESULTS FROM REAL CLIENTS
-const TestimonialsSection = () => {
+const TestimonialsSection = ({ t }) => {
   const [ref, isInView] = useInView({ once: true, threshold: 0.1 });
 
   const testimonials = [
@@ -1003,16 +896,16 @@ const TestimonialsSection = () => {
           isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-primary-blue mb-4">
-            Real Results from Real Clients
+            {t('home.testimonials_title')}
           </h2>
           <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
-            Don't just take our word for it. See what our clients are saying about their credit repair journey.
+            {t('home.testimonials_desc')}
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {testimonials.map((testimonial, index) => (
-            <TestimonialCard key={index} testimonial={testimonial} index={index} isInView={isInView} />
+            <TestimonialCard key={index} testimonial={testimonial} index={index} isInView={isInView} t={t} />
           ))}
         </div>
       </div>
@@ -1020,7 +913,7 @@ const TestimonialsSection = () => {
   );
 };
 
-const TestimonialCard = ({ testimonial, index, isInView }) => (
+const TestimonialCard = ({ testimonial, index, isInView, t }) => (
   <div
     className={`bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ${
       isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
@@ -1036,12 +929,12 @@ const TestimonialCard = ({ testimonial, index, isInView }) => (
     <div className="flex items-center gap-4 mb-4">
       <div className="text-center">
         <div className="text-2xl font-bold text-red-600">{testimonial.before}</div>
-        <div className="text-xs text-gray-500">Before</div>
+        <div className="text-xs text-gray-500">{t('home.before')}</div>
       </div>
       <ArrowRight className="w-6 h-6 text-gray-400" />
       <div className="text-center">
         <div className="text-2xl font-bold text-green-600">{testimonial.after}</div>
-        <div className="text-xs text-gray-500">After</div>
+        <div className="text-xs text-gray-500">{t('home.after')}</div>
       </div>
       <div className="ml-auto">
         <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
@@ -1062,14 +955,14 @@ const TestimonialCard = ({ testimonial, index, isInView }) => (
     
     <Button variant="link" className="text-primary-blue p-0 h-auto mt-3" asChild>
       <Link to="/success-stories">
-        Read Full Story <ArrowRight className="w-3 h-3 ml-1" />
+        {t('home.read_story')} <ArrowRight className="w-3 h-3 ml-1" />
       </Link>
     </Button>
   </div>
 );
 
 // SECTION 9: LOCAL SEO SECTION
-const LocalSEOSection = () => {
+const LocalSEOSection = ({ t }) => {
   const [ref, isInView] = useInView({ once: true, threshold: 0.1 });
 
   return (
@@ -1079,36 +972,36 @@ const LocalSEOSection = () => {
           isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-primary-blue mb-6 text-center">
-            Credit Repair Services in Philadelphia & Nationwide
+            {t('home.local_title')}
           </h2>
           
           <p className="text-gray-700 mb-6 leading-relaxed">
-            Since 2008, Credlocity has operated from our Philadelphia, Pennsylvania headquarters, providing professional credit repair services to clients across all 50 states. As a Hispanic-owned business founded by CEO Joeziel Vazquez, we're proud to serve diverse communities with ethical, compliant credit restoration services.
+            {t('home.local_desc')}
           </p>
 
           <div className="bg-white rounded-xl p-8 shadow-lg mb-8">
             <h3 className="font-cinzel text-2xl font-bold text-primary-blue mb-4">
-              Serving These Major Markets:
+              {t('home.serving_markets')}
             </h3>
             <p className="text-gray-700 leading-relaxed">
-              Philadelphia, PA • New York, NY • Los Angeles, CA • Chicago, IL • Houston, TX • Phoenix, AZ • San Antonio, TX • San Diego, CA • Dallas, TX • San Jose, CA • Austin, TX • Jacksonville, FL • Fort Worth, TX • Columbus, OH • Charlotte, NC • and all 50 states nationwide
+              Philadelphia, PA • New York, NY • Los Angeles, CA • Chicago, IL • Houston, TX • Phoenix, AZ • San Antonio, TX • San Diego, CA • Dallas, TX • San Jose, CA • Austin, TX • Jacksonville, FL • Fort Worth, TX • Columbus, OH • Charlotte, NC
             </p>
           </div>
 
           <div className="bg-gradient-primary text-white rounded-xl p-8">
-            <h3 className="font-cinzel text-2xl font-bold mb-6">Get Started Online</h3>
+            <h3 className="font-cinzel text-2xl font-bold mb-6">{t('home.get_started_online')}</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 flex-shrink-0 mt-1" />
                 <div>
-                  <div className="font-semibold mb-1">Philadelphia Headquarters</div>
-                  <div className="text-gray-100">Serving all 50 states nationwide</div>
+                  <div className="font-semibold mb-1">{t('home.philly_hq')}</div>
+                  <div className="text-gray-100">{t('home.serving_50')}</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Mail className="w-5 h-5 flex-shrink-0 mt-1" />
                 <div>
-                  <div className="font-semibold mb-1">Email Support</div>
+                  <div className="font-semibold mb-1">{t('home.email_support')}</div>
                   <a href="mailto:support@credlocity.com" className="text-gray-100 hover:underline">
                     support@credlocity.com
                   </a>
@@ -1117,15 +1010,15 @@ const LocalSEOSection = () => {
               <div className="flex items-start gap-3">
                 <ShieldCheck className="w-5 h-5 flex-shrink-0 mt-1" />
                 <div>
-                  <div className="font-semibold mb-1">TSR Compliant</div>
-                  <div className="text-gray-100">100% online enrollment - No phone calls required</div>
+                  <div className="font-semibold mb-1">{t('home.tsr_compliant')}</div>
+                  <div className="text-gray-100">{t('home.tsr_online')}</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Clock className="w-5 h-5 flex-shrink-0 mt-1" />
                 <div>
-                  <div className="font-semibold mb-1">Sign Up Anytime</div>
-                  <div className="text-gray-100">24/7 online enrollment available</div>
+                  <div className="font-semibold mb-1">{t('home.signup_anytime')}</div>
+                  <div className="text-gray-100">{t('home.247_enrollment')}</div>
                 </div>
               </div>
             </div>
@@ -1140,7 +1033,7 @@ const LocalSEOSection = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Start Your Free Trial Online
+                  {t('home.start_trial_online')}
                 </a>
               </Button>
             </div>
@@ -1152,30 +1045,15 @@ const LocalSEOSection = () => {
 };
 
 // SECTION 10: FAQ SECTION
-const FAQSection = ({ openFaq, setOpenFaq }) => {
+const FAQSection = ({ openFaq, setOpenFaq, t }) => {
   const [ref, isInView] = useInView({ once: true, threshold: 0.1 });
 
   const faqs = [
-    {
-      question: "How long does credit repair take?",
-      answer: "Most clients see results within 60-90 days, with significant improvements by 6 months. The timeline depends on the number and type of negative items. Collections and late payments are often removed faster than bankruptcies or judgments. Credit bureaus have 30 days to investigate disputes under FCRA."
-    },
-    {
-      question: "Can you really remove negative items from my credit report?",
-      answer: "Yes, but only items that are inaccurate, unverifiable, or violate consumer protection laws. Legitimate negative information that creditors can verify may remain. However, many negative items contain errors or compliance violations that make them legally removable under FCRA, FDCPA, or FCBA."
-    },
-    {
-      question: "How much does credit repair cost?",
-      answer: "Credit repair typically costs $79-$149 per month. Credlocity offers a 30-day free trial with no upfront service fees. You only pay for required services: credit report analysis ($49.95) and power of attorney e-notary ($39.95). After your free trial, monthly service is $99/month with our 180-day money-back guarantee."
-    },
-    {
-      question: "Is credit repair legal?",
-      answer: "Yes. Credit repair is 100% legal under the Credit Repair Organizations Act (CROA). You have the right to dispute inaccurate information under the Fair Credit Reporting Act (FCRA). Reputable companies like Credlocity operate in full compliance with federal regulations including TSR and CROA."
-    },
-    {
-      question: "Will credit repair hurt my credit score?",
-      answer: "No. Disputing items cannot hurt your credit score. If a dispute is successful, negative items are removed and your score improves. If unsuccessful, your credit stays the same. There is no downside to legitimate credit repair disputes."
-    }
+    { question: t('home.faq1_q'), answer: t('home.faq1_a') },
+    { question: t('home.faq2_q'), answer: t('home.faq2_a') },
+    { question: t('home.faq3_q'), answer: t('home.faq3_a') },
+    { question: t('home.faq4_q'), answer: t('home.faq4_a') },
+    { question: t('home.faq5_q'), answer: t('home.faq5_a') }
   ];
 
   return (
@@ -1185,10 +1063,10 @@ const FAQSection = ({ openFaq, setOpenFaq }) => {
           isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-primary-blue mb-4">
-            Common Questions About Credit Repair
+            {t('home.faq_title')}
           </h2>
           <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
-            Get answers to the most frequently asked questions about our credit repair services.
+            {t('home.faq_desc')}
           </p>
         </div>
 
@@ -1209,11 +1087,11 @@ const FAQSection = ({ openFaq, setOpenFaq }) => {
           isInView ? 'opacity-100' : 'opacity-0'
         }`}>
           <p className="text-gray-700 mb-4">
-            Have more questions? Visit our comprehensive FAQ page with 50+ answers.
+            {t('home.faq_more')}
           </p>
           <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white" asChild>
             <Link to="/faq">
-              View All FAQs <ArrowRight className="w-4 h-4 ml-2" />
+              {t('home.view_all_faqs')} <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
         </div>
@@ -1270,7 +1148,7 @@ const FAQItem = ({ faq, index, isOpen, onClick, isInView }) => (
 );
 
 // SECTION 11: FINAL CTA
-const FinalCTA = () => {
+const FinalCTA = ({ t }) => {
   const [ref, isInView] = useInView({ once: true, threshold: 0.3 });
 
   return (
@@ -1280,10 +1158,10 @@ const FinalCTA = () => {
           isInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}>
           <h2 className="font-cinzel text-3xl md:text-4xl font-bold mb-4">
-            Ready to Take Control of Your Credit?
+            {t('home.cta_title')}
           </h2>
           <p className="text-lg md:text-xl mb-8 text-gray-100">
-            Start your 30-day free trial today. No credit card required. No first work fee. Cancel anytime.
+            {t('home.cta_desc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
@@ -1296,7 +1174,7 @@ const FinalCTA = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Start Your Free Trial
+                {t('home.cta_trial')}
               </a>
             </Button>
             <Button 
@@ -1310,7 +1188,7 @@ const FinalCTA = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Book a Consultation
+                {t('home.cta_consult')}
               </a>
             </Button>
           </div>

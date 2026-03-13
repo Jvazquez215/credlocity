@@ -371,6 +371,78 @@ const AgentDashboard = ({ token }) => {
   );
 };
 
+// Widget Page Exclusions Component
+const WidgetPageExclusions = ({ token }) => {
+  const [pages, setPages] = useState([]);
+  const [newPath, setNewPath] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  const fetchPages = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/support-chat/widget/excluded-pages`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) { const d = await res.json(); setPages(d.pages || []); }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
+  }, [token]);
+
+  const addPage = async () => {
+    if (!newPath.trim()) return;
+    try {
+      const res = await fetch(`${API_URL}/api/support-chat/widget/excluded-pages`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_path: newPath.trim() })
+      });
+      if (res.ok) { setNewPath(''); fetchPages(); toast.success('Page excluded'); }
+      else { const d = await res.json(); toast.error(d.detail || 'Error'); }
+    } catch (err) { toast.error('Failed to add'); }
+  };
+
+  const removePage = async (id) => {
+    try {
+      await fetch(`${API_URL}/api/support-chat/widget/excluded-pages/${id}`, {
+        method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+      });
+      fetchPages();
+    } catch (err) { toast.error('Failed to remove'); }
+  };
+
+  useEffect(() => { fetchPages(); }, [fetchPages]);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Widget Page Exclusions</CardTitle>
+        <CardDescription>Hide the public chat widget on specific pages. Use * for wildcards (e.g., /blog/*)</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Input value={newPath} onChange={e => setNewPath(e.target.value)} placeholder="/page-path or /section/*" className="flex-1" data-testid="exclude-page-input" />
+          <Button onClick={addPage} disabled={!newPath.trim()} data-testid="exclude-page-btn">
+            <Plus className="w-4 h-4 mr-1" /> Exclude
+          </Button>
+        </div>
+        {loading ? (
+          <div className="text-center py-4"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div>
+        ) : pages.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-4">No pages excluded. The chat widget shows on all public pages.</p>
+        ) : (
+          <div className="space-y-2">
+            {pages.map(p => (
+              <div key={p.id} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
+                <code className="text-sm font-mono">{p.page_path}</code>
+                <button onClick={() => removePage(p.id)} className="text-red-400 hover:text-red-600"><X className="w-4 h-4" /></button>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 // Chatbot Settings Tab
 const ChatbotSettings = ({ token }) => {
   const [settings, setSettings] = useState(null);
@@ -641,6 +713,71 @@ const ChatbotSettings = ({ token }) => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Working Hours */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Working Hours</CardTitle>
+          <CardDescription>Set when live agents are available. Outside these hours, the offline message is shown.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Enable Working Hours</p>
+              <p className="text-sm text-gray-500">Restrict live chat to specific hours</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" checked={settings.working_hours?.enabled || false}
+                onChange={(e) => setSettings({ ...settings, working_hours: { ...settings.working_hours, enabled: e.target.checked } })}
+                className="sr-only peer" />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+            </label>
+          </div>
+          {settings.working_hours?.enabled && (
+            <div className="space-y-2">
+              {['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].map(day => {
+                const schedule = settings.working_hours?.schedule?.[day];
+                const isEnabled = schedule !== null && schedule !== undefined;
+                return (
+                  <div key={day} className="flex items-center gap-3">
+                    <label className="w-24 text-sm capitalize font-medium">{day}</label>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked={isEnabled}
+                        onChange={(e) => {
+                          const newSchedule = { ...settings.working_hours.schedule };
+                          newSchedule[day] = e.target.checked ? { start: '09:00', end: '18:00' } : null;
+                          setSettings({ ...settings, working_hours: { ...settings.working_hours, schedule: newSchedule } });
+                        }}
+                        className="sr-only peer" />
+                      <div className="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+                    </label>
+                    {isEnabled ? (
+                      <div className="flex items-center gap-2">
+                        <input type="time" value={schedule?.start || '09:00'} onChange={(e) => {
+                          const newSchedule = { ...settings.working_hours.schedule };
+                          newSchedule[day] = { ...newSchedule[day], start: e.target.value };
+                          setSettings({ ...settings, working_hours: { ...settings.working_hours, schedule: newSchedule } });
+                        }} className="px-2 py-1 border rounded text-sm" />
+                        <span className="text-gray-400">to</span>
+                        <input type="time" value={schedule?.end || '18:00'} onChange={(e) => {
+                          const newSchedule = { ...settings.working_hours.schedule };
+                          newSchedule[day] = { ...newSchedule[day], end: e.target.value };
+                          setSettings({ ...settings, working_hours: { ...settings.working_hours, schedule: newSchedule } });
+                        }} className="px-2 py-1 border rounded text-sm" />
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-400">Closed</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Widget Page Exclusions */}
+      <WidgetPageExclusions token={token} />
 
       <div className="flex justify-end">
         <Button onClick={saveSettings} disabled={saving} className="bg-blue-500 hover:bg-blue-600">

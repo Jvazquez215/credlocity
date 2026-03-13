@@ -142,16 +142,18 @@ export default function PublicChatWidget() {
           const data = await res.json();
           setSettings(data);
           
-          // Check if widget should show on current page
           const currentPath = window.location.pathname;
           const excludedPaths = data.excluded_pages || [];
+          // Auto-exclude admin, attorney, company, partner portals
+          const portalPrefixes = ['/admin', '/attorney', '/company', '/partner'];
+          const isPortal = portalPrefixes.some(p => currentPath.startsWith(p));
           const isExcluded = excludedPaths.some(path => {
             if (path.endsWith('*')) {
               return currentPath.startsWith(path.slice(0, -1));
             }
             return currentPath === path;
           });
-          setShouldShow(!isExcluded && data.widget_enabled !== false);
+          setShouldShow(!isPortal && !isExcluded && data.widget_enabled !== false);
         }
       } catch (err) {
         console.error('Error fetching chat settings:', err);

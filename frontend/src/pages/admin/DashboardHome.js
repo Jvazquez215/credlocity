@@ -4,8 +4,11 @@ import {
   FileText, Edit, Star, MessageSquare, Users, Image, 
   TrendingUp, Eye, Clock, ArrowUpRight, BarChart3,
   Scale, Newspaper, Building2, AlertCircle, DollarSign,
-  Flame, Calendar
+  Flame, Calendar, Phone, GraduationCap, Wallet, Shield,
+  Target, CheckCircle
 } from 'lucide-react';
+import { usePermissions } from '../../context/PermissionsContext';
+import { useTranslation } from '../../context/TranslationContext';
 import api from '../../utils/api';
 
 const StatCard = ({ icon: Icon, label, value, color, link, subtitle, trend }) => (
@@ -58,26 +61,26 @@ const ActivityItem = ({ icon: Icon, title, subtitle, time, color }) => (
 
 const DashboardHome = () => {
   const [stats, setStats] = useState({
-    pages: 0,
-    blogPosts: 0,
-    reviews: 0,
-    authors: 0,
-    lawsuits: 0,
-    pressReleases: 0,
-    partners: 0,
-    pendingInquiries: 0,
-    openTickets: 0,
-    totalClients: 0,
-    hotLeads: 0,
-    clientsLast30Days: 0
+    pages: 0, blogPosts: 0, reviews: 0, authors: 0,
+    lawsuits: 0, pressReleases: 0, partners: 0,
+    pendingInquiries: 0, openTickets: 0,
+    totalClients: 0, hotLeads: 0, clientsLast30Days: 0,
+    // Collections
+    collectionsAccounts: 0, activeCollections: 0, commissionEarned: 0,
+    // Payroll
+    payrollProfiles: 0, pendingCommissions: 0,
+    // Training
+    trainingModules: 0,
   });
   const [recentPosts, setRecentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { hasPerm } = usePermissions();
+  const { t, lang } = useTranslation();
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [pagesRes, postsRes, reviewsRes, authorsRes, lawsuitsRes, pressRes, partnersRes, inquiriesRes, ticketsRes, clientStatsRes] = await Promise.all([
+        const [pagesRes, postsRes, reviewsRes, authorsRes, lawsuitsRes, pressRes, partnersRes, inquiriesRes, ticketsRes, clientStatsRes, commissionRes, payrollRes, trainingRes] = await Promise.all([
           api.get('/pages').catch(() => ({ data: [] })),
           api.get('/blog/posts').catch(() => ({ data: { posts: [] } })),
           api.get('/reviews').catch(() => ({ data: [] })),
@@ -87,7 +90,10 @@ const DashboardHome = () => {
           api.get('/admin/outsource/partners').catch(() => ({ data: [] })),
           api.get('/admin/outsource/inquiries').catch(() => ({ data: [] })),
           api.get('/admin/outsource/tickets').catch(() => ({ data: [] })),
-          api.get('/admin/clients/stats').catch(() => ({ data: { total: 0, by_lead_status: {}, by_period: {} } }))
+          api.get('/admin/clients/stats').catch(() => ({ data: { total: 0, by_lead_status: {}, by_period: {} } })),
+          api.get('/collections/commission-dashboard').catch(() => ({ data: { summary: {} } })),
+          api.get('/payroll/dashboard').catch(() => ({ data: {} })),
+          api.get('/training/modules').catch(() => ({ data: { modules: [] } })),
         ]);
 
         const posts = postsRes.data.posts || postsRes.data || [];
@@ -95,6 +101,9 @@ const DashboardHome = () => {
         const inquiries = inquiriesRes.data || [];
         const tickets = ticketsRes.data || [];
         const clientStats = clientStatsRes.data || {};
+        const commSummary = commissionRes.data?.summary || {};
+        const payrollData = payrollRes.data || {};
+        const trainingMods = trainingRes.data?.modules || [];
 
         setStats({
           pages: Array.isArray(pagesRes.data) ? pagesRes.data.length : 0,
@@ -108,7 +117,16 @@ const DashboardHome = () => {
           openTickets: tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length,
           totalClients: clientStats.total || 0,
           hotLeads: clientStats.by_lead_status?.hot || 0,
-          clientsLast30Days: clientStats.by_period?.last_30_days?.count || 0
+          clientsLast30Days: clientStats.by_period?.last_30_days?.count || 0,
+          // Collections & Commissions
+          commissionEarned: commSummary.total_earned || 0,
+          pendingCommissions: commSummary.total_pending || 0,
+          activeTrackers: commSummary.active_trackers || 0,
+          // Payroll
+          payrollProfiles: payrollData.active_employees || 0,
+          totalSalaries: payrollData.total_annual_salaries || 0,
+          // Training
+          trainingModules: trainingMods.length,
         });
 
         setRecentPosts(posts.slice(0, 5));
@@ -140,12 +158,12 @@ const DashboardHome = () => {
       <div className="bg-gradient-to-r from-primary-blue to-blue-700 rounded-2xl p-8 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome to Credlocity CMS</h1>
-            <p className="text-blue-100 text-lg">Manage your content, partners, and business operations</p>
+            <h1 className="text-3xl font-bold mb-2">{t('nav.welcome')}</h1>
+            <p className="text-blue-100 text-lg">{t('nav.welcome_sub')}</p>
           </div>
           <div className="hidden md:flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm text-blue-200">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <p className="text-sm text-blue-200">{new Date().toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
             </div>
           </div>
         </div>
@@ -153,43 +171,43 @@ const DashboardHome = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('nav.quick_actions')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <QuickAction icon={Edit} label="New Blog Post" to="/admin/blog/create" color="bg-green-500" />
-          <QuickAction icon={Scale} label="Add Lawsuit" to="/admin/lawsuits/new" color="bg-purple-500" />
-          <QuickAction icon={Building2} label="Manage Partners" to="/admin/outsourcing" color="bg-blue-500" />
-          <QuickAction icon={Star} label="Add Review" to="/admin/reviews/create" color="bg-amber-500" />
+          <QuickAction icon={Edit} label={t('nav.new_blog_post')} to="/admin/blog/create" color="bg-green-500" />
+          <QuickAction icon={Scale} label={t('nav.add_lawsuit')} to="/admin/lawsuits/new" color="bg-purple-500" />
+          <QuickAction icon={Building2} label={t('nav.manage_partners')} to="/admin/outsourcing" color="bg-blue-500" />
+          <QuickAction icon={Star} label={t('nav.add_review')} to="/admin/reviews/create" color="bg-amber-500" />
         </div>
       </div>
 
       {/* Stats Grid */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Content Overview</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('kpi.content_overview')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard 
             icon={FileText} 
-            label="Pages" 
+            label={t('kpi.pages')}
             value={loading ? '...' : stats.pages}
             color="bg-blue-500"
             link="/admin/pages"
           />
           <StatCard 
             icon={Edit} 
-            label="Blog Posts" 
+            label={t('kpi.blog_posts')}
             value={loading ? '...' : stats.blogPosts}
             color="bg-green-500"
             link="/admin/blog"
           />
           <StatCard 
             icon={Star} 
-            label="Reviews" 
+            label={t('kpi.reviews')}
             value={loading ? '...' : stats.reviews}
             color="bg-purple-500"
             link="/admin/reviews"
           />
           <StatCard 
             icon={Users} 
-            label="Team Members" 
+            label={t('kpi.team_members')}
             value={loading ? '...' : stats.authors}
             color="bg-amber-500"
             link="/admin/authors"
@@ -197,21 +215,46 @@ const DashboardHome = () => {
         </div>
       </div>
 
+      {/* Department Overview - Collections, Payroll, Training */}
+      {hasPerm('collections.view') && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('kpi.collections_revenue')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard icon={DollarSign} label={t('dashboard.commission_earned')} value={loading ? '...' : `$${stats.commissionEarned?.toLocaleString()}`} color="bg-green-500" link="/admin/collections/commissions-dashboard" />
+            <StatCard icon={Clock} label={t('kpi.pending_commissions')} value={loading ? '...' : `$${stats.pendingCommissions?.toLocaleString()}`} color="bg-yellow-500" link="/admin/collections/commissions-dashboard" />
+            <StatCard icon={Target} label={t('dashboard.active_trackers')} value={loading ? '...' : stats.activeTrackers} color="bg-blue-500" link="/admin/collections/commissions-dashboard" subtitle={t('dashboard.threshold_tracking')} />
+            <StatCard icon={Phone} label={t('dashboard.collections')} value={loading ? '...' : t('dashboard.view')} color="bg-indigo-500" link="/admin/collections" subtitle={t('dashboard.dashboard')} />
+          </div>
+        </div>
+      )}
+
+      {hasPerm('payroll.view') && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('kpi.hr_payroll')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard icon={Wallet} label={t('dashboard.active_employees')} value={loading ? '...' : stats.payrollProfiles} color="bg-emerald-500" link="/admin/payroll" />
+            <StatCard icon={DollarSign} label={t('kpi.annual_salaries')} value={loading ? '...' : `$${stats.totalSalaries?.toLocaleString()}`} color="bg-teal-500" link="/admin/payroll" />
+            <StatCard icon={GraduationCap} label={t('dashboard.training_modules')} value={loading ? '...' : stats.trainingModules} color="bg-violet-500" link="/admin/training" />
+            <StatCard icon={Shield} label={t('nav.security')} value={t('dashboard.view')} color="bg-slate-500" link="/admin/security" subtitle={t('dashboard.escalations')} />
+          </div>
+        </div>
+      )}
+
       {/* Legal & Outsourcing Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Legal Content</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('dashboard.legal_content')}</h2>
           <div className="grid grid-cols-2 gap-4">
             <StatCard 
               icon={Scale} 
-              label="Lawsuits Filed" 
+              label={t('dashboard.lawsuits_filed')}
               value={loading ? '...' : stats.lawsuits}
               color="bg-red-500"
               link="/admin/lawsuits"
             />
             <StatCard 
               icon={Newspaper} 
-              label="Press Releases" 
+              label={t('dashboard.press_releases')}
               value={loading ? '...' : stats.pressReleases}
               color="bg-indigo-500"
               link="/admin/press-releases"
@@ -219,26 +262,26 @@ const DashboardHome = () => {
           </div>
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Clients</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('dashboard.clients')}</h2>
           <div className="grid grid-cols-3 gap-4">
             <StatCard 
               icon={Users} 
-              label="Total Clients" 
+              label={t('kpi.total_clients')}
               value={loading ? '...' : stats.totalClients}
               color="bg-green-500"
               link="/admin/clients"
             />
             <StatCard 
               icon={Flame} 
-              label="Hot Leads" 
+              label={t('dashboard.hot_leads')}
               value={loading ? '...' : stats.hotLeads}
               color={stats.hotLeads > 0 ? "bg-red-500" : "bg-gray-400"}
               link="/admin/clients?lead=hot"
-              subtitle={stats.hotLeads > 0 ? "Ready to convert" : "No hot leads"}
+              subtitle={stats.hotLeads > 0 ? t('dashboard.ready_to_convert') : t('dashboard.no_hot_leads')}
             />
             <StatCard 
               icon={Calendar} 
-              label="New (30 days)" 
+              label={t('dashboard.new_30_days')}
               value={loading ? '...' : stats.clientsLast30Days}
               color="bg-blue-500"
               link="/admin/clients?days=30"
@@ -246,30 +289,30 @@ const DashboardHome = () => {
           </div>
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Outsourcing</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('dashboard.outsourcing')}</h2>
           <div className="grid grid-cols-3 gap-4">
             <StatCard 
               icon={Building2} 
-              label="Active Partners" 
+              label={t('dashboard.active_partners')}
               value={loading ? '...' : stats.partners}
               color="bg-teal-500"
               link="/admin/outsourcing/partners"
             />
             <StatCard 
               icon={AlertCircle} 
-              label="Pending Inquiries" 
+              label={t('dashboard.pending_inquiries')}
               value={loading ? '...' : stats.pendingInquiries}
               color={stats.pendingInquiries > 0 ? "bg-orange-500" : "bg-gray-400"}
               link="/admin/outsourcing/inquiries"
-              subtitle={stats.pendingInquiries > 0 ? "Needs attention" : "All caught up!"}
+              subtitle={stats.pendingInquiries > 0 ? t('dashboard.needs_attention') : t('dashboard.all_caught_up')}
             />
             <StatCard 
               icon={AlertCircle} 
-              label="Open Tickets" 
+              label={t('dashboard.open_tickets')}
               value={loading ? '...' : stats.openTickets}
               color={stats.openTickets > 0 ? "bg-red-500" : "bg-gray-400"}
               link="/admin/outsourcing/tickets"
-              subtitle={stats.openTickets > 0 ? "Escalations" : "No open tickets"}
+              subtitle={stats.openTickets > 0 ? t('dashboard.escalations') : t('dashboard.no_open_tickets')}
             />
           </div>
         </div>
@@ -280,9 +323,9 @@ const DashboardHome = () => {
         {/* Recent Blog Posts */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Blog Posts</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.recent_posts')}</h2>
             <Link to="/admin/blog" className="text-primary-blue text-sm font-medium hover:underline flex items-center gap-1">
-              View All <ArrowUpRight className="w-4 h-4" />
+              {t('dashboard.view_all')} <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
           {loading ? (
@@ -313,49 +356,49 @@ const DashboardHome = () => {
           ) : (
             <div className="text-center py-8 text-gray-500">
               <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-              <p>No blog posts yet</p>
-              <Link to="/admin/blog/create" className="text-primary-blue text-sm hover:underline">Create your first post</Link>
+              <p>{t('dashboard.no_posts')}</p>
+              <Link to="/admin/blog/create" className="text-primary-blue text-sm hover:underline">{t('dashboard.create_first')}</Link>
             </div>
           )}
         </div>
 
         {/* System Status */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">System Status</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('dashboard.system_status')}</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="font-medium text-green-800">Website</span>
+                <span className="font-medium text-green-800">{t('dashboard.website')}</span>
               </div>
-              <span className="text-green-600 text-sm font-medium">Online</span>
+              <span className="text-green-600 text-sm font-medium">{t('dashboard.online')}</span>
             </div>
             <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="font-medium text-green-800">API</span>
+                <span className="font-medium text-green-800">{t('dashboard.api')}</span>
               </div>
-              <span className="text-green-600 text-sm font-medium">Operational</span>
+              <span className="text-green-600 text-sm font-medium">{t('dashboard.operational')}</span>
             </div>
             <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="font-medium text-green-800">Database</span>
+                <span className="font-medium text-green-800">{t('dashboard.database')}</span>
               </div>
-              <span className="text-green-600 text-sm font-medium">Connected</span>
+              <span className="text-green-600 text-sm font-medium">{t('dashboard.connected')}</span>
             </div>
           </div>
           
           <div className="mt-6 pt-4 border-t">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Quick Links</h3>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('dashboard.quick_links')}</h3>
             <div className="grid grid-cols-2 gap-2">
               <Link to="/admin/media" className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm">
                 <Image className="w-4 h-4 text-gray-500" />
-                Media Library
+                {t('dashboard.media_library')}
               </Link>
               <Link to="/admin/settings" className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-sm">
                 <BarChart3 className="w-4 h-4 text-gray-500" />
-                Site Settings
+                {t('dashboard.site_settings')}
               </Link>
             </div>
           </div>

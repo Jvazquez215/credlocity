@@ -19,6 +19,9 @@ const CreatePage = () => {
     og_title: '',
     og_description: '',
     og_image: '',
+    canonical_url: '',
+    robots_index: true,
+    robots_follow: true,
     schema_types: [],
     status: 'draft'
   });
@@ -250,6 +253,43 @@ const CreatePage = () => {
                 <p className="text-xs text-gray-500 mt-1">
                   Recommended size: 1200x630px. Defaults to featured image if blank.
                 </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Canonical URL
+                </label>
+                <input
+                  type="url"
+                  value={formData.canonical_url || ''}
+                  onChange={(e) => setFormData({ ...formData, canonical_url: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="https://www.credlocity.com/your-page (leave blank for auto)"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Set a canonical URL to avoid duplicate content issues. Leave blank to use the page's default URL.
+                </p>
+              </div>
+
+              <div className="flex gap-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.robots_index !== false}
+                    onChange={(e) => setFormData({ ...formData, robots_index: e.target.checked })}
+                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Allow search engines to index this page</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.robots_follow !== false}
+                    onChange={(e) => setFormData({ ...formData, robots_follow: e.target.checked })}
+                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Allow search engines to follow links</span>
+                </label>
               </div>
             </div>
           )}

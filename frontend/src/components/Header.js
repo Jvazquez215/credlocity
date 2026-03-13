@@ -59,10 +59,10 @@ const Header = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-6">
             <Link to="/" className="text-gray-700 hover:text-primary-blue font-medium py-2">
-              Home
+              {t('site.home')}
             </Link>
             <Link to="/pricing" className="text-gray-700 hover:text-primary-blue font-medium py-2">
-              Plans & Pricing
+              {t('site.plans_pricing')}
             </Link>
             
             {/* About Us Dropdown */}
@@ -72,7 +72,7 @@ const Header = () => {
               onMouseLeave={handleAboutLeave}
             >
               <button className="flex items-center space-x-1 text-gray-700 hover:text-primary-blue font-medium py-2">
-                <span>About Us</span>
+                <span>{t('site.about_us')}</span>
                 <ChevronDown className="w-4 h-4" />
               </button>
               
@@ -81,22 +81,22 @@ const Header = () => {
                   className="absolute top-full left-0 w-64 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50"
                 >
                   <Link to="/why-us" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    Why Us
+                    {t('site.why_us')}
                   </Link>
                   <Link to="/30-day-free-trial" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    30 Day Free Trial
+                    {t('site.free_trial')}
                   </Link>
                   <Link to="/collection-removal" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    Collection Removal
+                    {t('site.collection_removal')}
                   </Link>
                   <Link to="/late-payment-removal" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    Late Payment Removal
+                    {t('site.late_payment_removal')}
                   </Link>
                   <Link to="/fraud-removal" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    Fraud Removal
+                    {t('site.fraud_removal')}
                   </Link>
                   <Link to="/human-trafficking-credit-block" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    Human Trafficking Credit Block
+                    {t('site.human_trafficking_block')}
                   </Link>
                 </div>
               )}
@@ -109,7 +109,7 @@ const Header = () => {
               onMouseLeave={handleResourcesLeave}
             >
               <button className="flex items-center space-x-1 text-gray-700 hover:text-primary-blue font-medium py-2">
-                <span>Resources</span>
+                <span>{t('site.resources')}</span>
                 <ChevronDown className="w-4 h-4" />
               </button>
               
@@ -118,32 +118,32 @@ const Header = () => {
                   className="absolute top-full left-0 w-64 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50"
                 >
                   <Link to="/how-it-works" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    How It Works
+                    {t('site.how_it_works')}
                   </Link>
                   <Link to="/faq" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    FAQs
+                    {t('site.faqs')}
                   </Link>
                   <Link to="/blog" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    Blog
+                    {t('site.blog')}
                   </Link>
                   <Link to="/team" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    Our Team
+                    {t('site.our_team')}
                   </Link>
                   <Link to="/faqs" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    FAQs
+                    {t('site.faqs')}
                   </Link>
                   <Link to="/credit-scores" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    Educational Guides
+                    {t('site.educational_guides')}
                   </Link>
                   <Link to="/credit-repair-scams" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    Credit Repair Scam Info
+                    {t('site.credit_repair_scams')}
                   </Link>
                 </div>
               )}
             </div>
 
             <Link to="/credit-tracker-app" className="text-gray-700 hover:text-primary-blue font-medium py-2">
-              Credit Tracker App
+              {t('site.credit_tracker')}
             </Link>
           </div>
 
@@ -178,7 +178,7 @@ const Header = () => {
               className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white"
               data-testid="header-login-btn"
             >
-              <Link to="/admin/login">Login</Link>
+              <Link to="/admin/login">{t('site.login')}</Link>
             </Button>
             <Button
               asChild
@@ -190,7 +190,7 @@ const Header = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Start Free Trial
+                {t('site.start_free_trial')}
               </a>
             </Button>
           </div>
@@ -210,65 +210,65 @@ const Header = () => {
           <div className="lg:hidden mt-4 pb-4 border-t border-gray-100" data-testid="mobile-menu">
             <div className="flex flex-col space-y-4 mt-4">
               <Link to="/" className="text-gray-700 hover:text-primary-blue font-medium">
-                Home
+                {t('site.home')}
               </Link>
               <Link to="/pricing" className="text-gray-700 hover:text-primary-blue font-medium">
-                Plans & Pricing
+                {t('site.plans_pricing')}
               </Link>
               
               {/* About Us Mobile */}
               <div className="space-y-2">
-                <div className="font-semibold text-gray-900">About Us</div>
+                <div className="font-semibold text-gray-900">{t('site.about_us')}</div>
                 <Link to="/why-us" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  Why Us
+                  {t('site.why_us')}
                 </Link>
                 <Link to="/30-day-free-trial" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  30 Day Free Trial
+                  {t('site.free_trial')}
                 </Link>
                 <Link to="/collection-removal" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  Collection Removal
+                  {t('site.collection_removal')}
                 </Link>
                 <Link to="/late-payment-removal" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  Late Payment Removal
+                  {t('site.late_payment_removal')}
                 </Link>
                 <Link to="/fraud-removal" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  Fraud Removal
+                  {t('site.fraud_removal')}
                 </Link>
                 <Link to="/human-trafficking-credit-block" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  Human Trafficking Credit Block
+                  {t('site.human_trafficking_block')}
                 </Link>
               </div>
 
               {/* Resources Mobile */}
               <div className="space-y-2">
-                <div className="font-semibold text-gray-900">Resources</div>
+                <div className="font-semibold text-gray-900">{t('site.resources')}</div>
                 <Link to="/how-it-works" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  How It Works
+                  {t('site.how_it_works')}
                 </Link>
                 <Link to="/faqs" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  FAQs
+                  {t('site.faqs')}
                 </Link>
                 <Link to="/blog" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  Blog
+                  {t('site.blog')}
                 </Link>
                 <Link to="/team" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  Our Team
+                  {t('site.our_team')}
                 </Link>
                 <Link to="/credit-scores" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  Educational Guides
+                  {t('site.educational_guides')}
                 </Link>
                 <Link to="/credit-repair-scams" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  Credit Repair Scam Info
+                  {t('site.credit_repair_scams')}
                 </Link>
               </div>
 
               <Link to="/credit-tracker-app" className="text-gray-700 hover:text-primary-blue font-medium">
-                Credit Tracker App
+                {t('site.credit_tracker')}
               </Link>
               
               <div className="flex flex-col space-y-2 pt-4 border-t border-gray-100">
                 <Button variant="outline" asChild className="w-full">
-                  <Link to="/admin/login">Login</Link>
+                  <Link to="/admin/login">{t('site.login')}</Link>
                 </Button>
                 <Button asChild className="w-full bg-secondary-green hover:bg-secondary-green/90">
                   <a 
@@ -276,7 +276,7 @@ const Header = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Start Free Trial
+                    {t('site.start_free_trial')}
                   </a>
                 </Button>
               </div>

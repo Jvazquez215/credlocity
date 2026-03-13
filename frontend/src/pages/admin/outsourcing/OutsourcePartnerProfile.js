@@ -10,8 +10,10 @@ import {
   ArrowLeft, Building2, User, DollarSign, History, Calendar, Receipt,
   ClipboardList, AlertTriangle, Pencil, Save, X, Archive, ArchiveRestore,
   Phone, Mail, Clock, CheckCircle, XCircle, Plus, Eye, MessageSquare,
-  FileText, Upload, Trash2, Tag, Percent, Gift, Ticket, StickyNote
+  FileText, Upload, Trash2, Tag, Percent, Gift, Ticket, StickyNote, Download, Pen
 } from 'lucide-react';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const OutsourcePartnerProfile = () => {
   const navigate = useNavigate();
@@ -40,6 +42,21 @@ const OutsourcePartnerProfile = () => {
   const [showCouponForm, setShowCouponForm] = useState(false);
   const [showWorkLogForm, setShowWorkLogForm] = useState(false);
   const [showWorkLogDetail, setShowWorkLogDetail] = useState(null);
+  const [showServiceAgreementForm, setShowServiceAgreementForm] = useState(false);
+  const [serviceAgreements, setServiceAgreements] = useState([]);
+  const [generatingAgreement, setGeneratingAgreement] = useState(false);
+  const [serviceAgreementFormData, setServiceAgreementFormData] = useState({
+    rate_per_account: 30.00,
+    min_accounts: 35,
+    max_accounts: 50,
+    package_name: 'Bureau Letters Only - Variable Volume',
+    additional_terms: '',
+    provider_name: 'Credlocity LLC',
+    provider_address: ''
+  });
+  const [showEsignModal, setShowEsignModal] = useState(null);
+  const [esignFormData, setEsignFormData] = useState({ signer_name: '', signer_email: '' });
+  const [sendingEsign, setSendingEsign] = useState(false);
   
   const [ticketCategories, setTicketCategories] = useState([]);
   const [noteCategories, setNoteCategories] = useState([]);
@@ -140,8 +157,12 @@ const OutsourcePartnerProfile = () => {
         const response = await api.get(`/admin/outsource/partners/${partnerId}/notes`);
         setNotes(response.data);
       } else if (activeTab === 'agreements') {
-        const response = await api.get(`/admin/outsource/partners/${partnerId}/agreements`);
-        setAgreements(response.data);
+        const [docsRes, saRes] = await Promise.all([
+          api.get(`/admin/outsource/partners/${partnerId}/agreements`),
+          api.get(`/admin/outsource/partners/${partnerId}/service-agreements`)
+        ]);
+        setAgreements(docsRes.data);
+        setServiceAgreements(saRes.data);
       }
     } catch (error) {
       console.error('Error fetching tab data:', error);
@@ -221,6 +242,57 @@ const OutsourcePartnerProfile = () => {
       fetchTabData();
     } catch (error) {
       toast.error('Failed to delete agreement');
+    }
+  };
+
+  const handleGenerateServiceAgreement = async (e) => {
+    e.preventDefault();
+    setGeneratingAgreement(true);
+    try {
+      await api.post(`/admin/outsource/partners/${partnerId}/agreement`, serviceAgreementFormData);
+      toast.success('Service agreement generated successfully!');
+      setShowServiceAgreementForm(false);
+      setServiceAgreementFormData({
+        rate_per_account: 30.00, min_accounts: 35, max_accounts: 50,
+        package_name: 'Bureau Letters Only - Variable Volume',
+        additional_terms: '', provider_name: 'Credlocity LLC', provider_address: ''
+      });
+      fetchTabData();
+    } catch (error) {
+      console.error('Error generating agreement:', error);
+      toast.error(error.response?.data?.detail || 'Failed to generate service agreement');
+    } finally {
+      setGeneratingAgreement(false);
+    }
+  };
+
+  const handleUpdateAgreementStatus = async (agreementId, newStatus) => {
+    try {
+      await api.patch(`/admin/outsource/agreements/${agreementId}/status`, { status: newStatus });
+      toast.success('Agreement status updated');
+      fetchTabData();
+    } catch (error) {
+      toast.error('Failed to update agreement status');
+    }
+  };
+
+  const handleSendForEsign = async (e) => {
+    e.preventDefault();
+    if (!showEsignModal) return;
+    setSendingEsign(true);
+    try {
+      const res = await api.post(`/esign/send/${showEsignModal}`, esignFormData);
+      const signUrl = `${window.location.origin}/sign/${res.data.sign_token}`;
+      toast.success('E-signature request sent!');
+      await navigator.clipboard.writeText(signUrl).catch(() => {});
+      toast.info('Signing link copied to clipboard!');
+      setShowEsignModal(null);
+      setEsignFormData({ signer_name: '', signer_email: '' });
+      fetchTabData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to send for e-signature');
+    } finally {
+      setSendingEsign(false);
     }
   };
 
@@ -529,8 +601,48 @@ const OutsourcePartnerProfile = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Agreements & Documents</h2>
-              <Button onClick={() => setShowAgreementForm(true)}><Upload className="w-4 h-4 mr-2" /> Upload Agreement</Button>
+              <div className="flex gap-2">
+                <Button onClick={() => setShowServiceAgreementForm(true)} className="bg-blue-600 hover:bg-blue-700" data-testid="generate-agreement-btn"><FileText className="w-4 h-4 mr-2" /> Generate Service Agreement</Button>
+                <Button variant="outline" onClick={() => setShowAgreementForm(true)}><Upload className="w-4 h-4 mr-2" /> Upload Document</Button>
+              </div>
             </div>
+
+            {/* Service Agreements (generated) */}
+            {serviceAgreements.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">Service Agreements</h3>
+                <div className="space-y-2">
+                  {serviceAgreements.map((sa) => (
+                    <div key={sa.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50" data-testid={`service-agreement-${sa.id}`}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><FileText className="w-5 h-5 text-blue-600" /></div>
+                        <div>
+                          <p className="font-medium">Credit Repair Outsourcing Service Agreement</p>
+                          <p className="text-sm text-gray-500">${sa.rate_per_account}/account | {sa.min_accounts}-{sa.max_accounts} accounts | {sa.package_name}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">Created: {formatDate(sa.created_at)}{sa.pdf_url ? ' | PDF stored' : ''}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${sa.status === 'active' ? 'bg-green-100 text-green-700' : sa.status === 'signed' ? 'bg-blue-100 text-blue-700' : sa.status === 'sent' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>{sa.status}</span>
+                        <select value={sa.status} onChange={(e) => handleUpdateAgreementStatus(sa.id, e.target.value)} className="text-xs border rounded px-2 py-1">
+                          <option value="draft">Draft</option>
+                          <option value="sent">Sent</option>
+                          <option value="sent_for_signing">Sent for Signing</option>
+                          <option value="signed">Signed</option>
+                          <option value="active">Active</option>
+                          <option value="terminated">Terminated</option>
+                        </select>
+                        <Button variant="outline" size="sm" onClick={() => { setEsignFormData({ signer_name: partner?.contact_name || '', signer_email: partner?.contact_email || '' }); setShowEsignModal(sa.id); }} title="Send for E-Signature" data-testid={`esign-agreement-${sa.id}`}><Pen className="w-4 h-4 text-blue-600" /></Button>
+                        <Button variant="outline" size="sm" onClick={() => window.open(`${API_URL}/api/admin/outsource/agreements/${sa.id}/download`, '_blank')} data-testid={`download-agreement-${sa.id}`}><Download className="w-4 h-4" /></Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Partner Documents (uploaded + generated) */}
+            <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">Partner Documents</h3>
             {agreements.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -551,7 +663,8 @@ const OutsourcePartnerProfile = () => {
                         <td className="px-4 py-3 text-sm">{formatDate(agreement.expiration_date)}</td>
                         <td className="px-4 py-3 text-center"><span className={`px-2 py-1 rounded text-xs font-semibold ${agreement.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>{agreement.status}</span></td>
                         <td className="px-4 py-3 text-right"><div className="flex justify-end gap-2">
-                          {agreement.file_url && <Button variant="outline" size="sm" onClick={() => window.open(agreement.file_url, '_blank')}><Eye className="w-4 h-4" /></Button>}
+                          {agreement.file_url && <Button variant="outline" size="sm" onClick={() => window.open(agreement.file_url.startsWith('/media') ? `${API_URL}${agreement.file_url}` : agreement.file_url, '_blank')} data-testid={`view-doc-${agreement.id}`}><Eye className="w-4 h-4" /></Button>}
+                          {agreement.file_url && <Button variant="outline" size="sm" onClick={() => { const a = document.createElement('a'); a.href = agreement.file_url.startsWith('/media') ? `${API_URL}${agreement.file_url}` : agreement.file_url; a.download = agreement.file_name || 'document'; a.click(); }} data-testid={`download-doc-${agreement.id}`}><Download className="w-4 h-4" /></Button>}
                           <Button variant="outline" size="sm" onClick={() => handleDeleteAgreement(agreement.id)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
                         </div></td>
                       </tr>
@@ -560,7 +673,7 @@ const OutsourcePartnerProfile = () => {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-12 text-gray-500"><FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" /><p>No agreements uploaded</p></div>
+              <div className="text-center py-8 text-gray-500"><FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" /><p>No documents yet</p></div>
             )}
           </div>
         )}
@@ -969,6 +1082,126 @@ const OutsourcePartnerProfile = () => {
               <form onSubmit={handleApplyCoupon} className="space-y-4">
                 <div><Label>Coupon Code *</Label><Input value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} required placeholder="Enter coupon code" className="mt-1 uppercase" /></div>
                 <div className="flex gap-3 pt-4"><Button type="button" variant="outline" className="flex-1" onClick={() => setShowCouponForm(false)}>Cancel</Button><Button type="submit" className="flex-1">Apply Coupon</Button></div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Generate Service Agreement Modal */}
+      {showServiceAgreementForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg max-w-xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900" data-testid="generate-agreement-modal-title">Generate Service Agreement</h2>
+                <button onClick={() => setShowServiceAgreementForm(false)} className="text-gray-400 hover:text-gray-600"><X className="w-6 h-6" /></button>
+              </div>
+              <form onSubmit={handleGenerateServiceAgreement} className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm font-semibold text-blue-800">Credit Repair Outsourcing Service Agreement</p>
+                  <p className="text-xs text-blue-600 mt-1">This will generate a professional PDF agreement with the pricing details below.</p>
+                </div>
+                <div>
+                  <Label>Package Name *</Label>
+                  <select value={serviceAgreementFormData.package_name} onChange={(e) => setServiceAgreementFormData({...serviceAgreementFormData, package_name: e.target.value})} className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg" data-testid="agreement-package-name">
+                    <option value="Bureau Letters Only - Variable Volume">Bureau Letters Only - Variable Volume</option>
+                    <option value="Full Service - Variable Volume">Full Service - Variable Volume</option>
+                    <option value="Custom Package">Custom Package</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Rate Per Account ($) *</Label>
+                    <Input type="number" min="0" step="0.01" value={serviceAgreementFormData.rate_per_account} onChange={(e) => setServiceAgreementFormData({...serviceAgreementFormData, rate_per_account: parseFloat(e.target.value) || 0})} className="mt-1" data-testid="agreement-rate-per-account" />
+                  </div>
+                  <div>
+                    <Label>Provider Name</Label>
+                    <Input value={serviceAgreementFormData.provider_name} onChange={(e) => setServiceAgreementFormData({...serviceAgreementFormData, provider_name: e.target.value})} className="mt-1" data-testid="agreement-provider-name" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Min Accounts *</Label>
+                    <Input type="number" min="1" value={serviceAgreementFormData.min_accounts} onChange={(e) => setServiceAgreementFormData({...serviceAgreementFormData, min_accounts: parseInt(e.target.value) || 1})} className="mt-1" data-testid="agreement-min-accounts" />
+                  </div>
+                  <div>
+                    <Label>Max Accounts *</Label>
+                    <Input type="number" min="1" value={serviceAgreementFormData.max_accounts} onChange={(e) => setServiceAgreementFormData({...serviceAgreementFormData, max_accounts: parseInt(e.target.value) || 1})} className="mt-1" data-testid="agreement-max-accounts" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Provider Address</Label>
+                  <Input value={serviceAgreementFormData.provider_address} onChange={(e) => setServiceAgreementFormData({...serviceAgreementFormData, provider_address: e.target.value})} placeholder="123 Main St, City, State ZIP" className="mt-1" data-testid="agreement-provider-address" />
+                </div>
+                <div>
+                  <Label>Additional Terms</Label>
+                  <Textarea value={serviceAgreementFormData.additional_terms} onChange={(e) => setServiceAgreementFormData({...serviceAgreementFormData, additional_terms: e.target.value})} rows={3} placeholder="Any additional terms or conditions..." className="mt-1" data-testid="agreement-additional-terms" />
+                </div>
+
+                {/* Pricing Preview */}
+                <div className="bg-gray-50 border rounded-lg p-4 space-y-2" data-testid="agreement-pricing-preview">
+                  <h4 className="text-sm font-semibold text-gray-700">Pricing Preview</h4>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Rate per account:</span>
+                    <span className="font-semibold">${serviceAgreementFormData.rate_per_account.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Account range:</span>
+                    <span className="font-semibold">{serviceAgreementFormData.min_accounts} - {serviceAgreementFormData.max_accounts} accounts</span>
+                  </div>
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Monthly min:</span>
+                      <span className="font-bold text-green-700">${(serviceAgreementFormData.min_accounts * serviceAgreementFormData.rate_per_account).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Monthly max:</span>
+                      <span className="font-bold text-green-700">${(serviceAgreementFormData.max_accounts * serviceAgreementFormData.rate_per_account).toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button type="button" variant="outline" className="flex-1" onClick={() => setShowServiceAgreementForm(false)}>Cancel</Button>
+                  <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700" disabled={generatingAgreement} data-testid="submit-generate-agreement">
+                    {generatingAgreement ? 'Generating...' : 'Generate Agreement PDF'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* E-Signature Send Modal */}
+      {showEsignModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold text-gray-900" data-testid="esign-modal-title">Send for E-Signature</h2>
+                <button onClick={() => setShowEsignModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">Enter the signer's details. They will receive a unique link to review and sign the agreement electronically.</p>
+              <form onSubmit={handleSendForEsign} className="space-y-4">
+                <div>
+                  <Label>Signer Name *</Label>
+                  <Input value={esignFormData.signer_name} onChange={(e) => setEsignFormData({...esignFormData, signer_name: e.target.value})} required placeholder="Full legal name" className="mt-1" data-testid="esign-signer-name" />
+                </div>
+                <div>
+                  <Label>Signer Email *</Label>
+                  <Input type="email" value={esignFormData.signer_email} onChange={(e) => setEsignFormData({...esignFormData, signer_email: e.target.value})} required placeholder="email@company.com" className="mt-1" data-testid="esign-signer-email" />
+                </div>
+                <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-sm text-blue-700">
+                  A unique signing link will be generated and copied to your clipboard. The link expires in 30 days.
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <Button type="button" variant="outline" className="flex-1" onClick={() => setShowEsignModal(null)}>Cancel</Button>
+                  <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700" disabled={sendingEsign} data-testid="submit-esign-btn">
+                    {sendingEsign ? 'Sending...' : 'Send for Signature'}
+                  </Button>
+                </div>
               </form>
             </div>
           </div>

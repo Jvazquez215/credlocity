@@ -16,11 +16,12 @@ from uuid import uuid4
 import os
 import json
 from motor.motor_asyncio import AsyncIOMotorClient
+from db_client import get_client
 
 # Database connection
 MONGO_URL = os.environ.get("MONGO_URL")
 DB_NAME = os.environ.get("DB_NAME", "credlocity")
-client = AsyncIOMotorClient(MONGO_URL)
+client = get_client(MONGO_URL)
 db = client[DB_NAME]
 
 case_management_router = APIRouter(prefix="/api/cases", tags=["Case Management"])
@@ -598,7 +599,7 @@ async def upload_document(
     company_id = case.get("created_by_company_id", "default")
     
     # Create upload directory
-    upload_dir = f"/app/backend/uploads/cases/{company_id}/{case_id}/{document_type}"
+    upload_dir = os.path.join(os.environ.get("UPLOAD_BASE", "."), "uploads", "cases", company_id, case_id, document_type)
     os.makedirs(upload_dir, exist_ok=True)
     
     # Generate unique filename

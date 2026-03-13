@@ -9,12 +9,13 @@ from uuid import uuid4
 from typing import Optional, List
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
+from db_client import get_client
 import os
 import re
 
 # Get database connection
 mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-client = AsyncIOMotorClient(mongo_url)
+client = get_client(mongo_url)
 db = client[os.environ.get('DB_NAME', 'credlocity')]
 
 credit_repair_router = APIRouter()
@@ -128,6 +129,36 @@ async def list_credit_repair_companies(
     total = await db.credit_repair_companies.count_documents(query)
     
     return {"companies": companies, "total": total}
+
+
+@credit_repair_router.get("/companies/admin/stats")
+async def get_companies_stats():
+    """Get company statistics for admin dashboard"""
+    total = await db.credit_repair_companies.count_documents({})
+    
+    # Top companies by complaints
+    pipeline = [
+        {"$group": {"_id": "$company_id", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 10}
+    ]
+    top_by_complaints = await db.complaints.aggregate(pipeline).to_list(length=10)
+    
+    # Enrich with company names
+    top_companies = []
+    for t in top_by_complaints:
+        company = await db.credit_repair_companies.find_one({"id": t["_id"]}, {"_id": 0, "name": 1})
+        top_companies.append({
+            "company_id": t["_id"],
+            "name": company["name"] if company else "Unknown",
+            "complaint_count": t["count"]
+        })
+    
+    return {
+        "total_companies": total,
+        "top_companies_by_cases": top_companies
+    }
+
 
 
 @credit_repair_router.get("/companies/{company_id}")

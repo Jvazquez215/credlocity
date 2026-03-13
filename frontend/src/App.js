@@ -4,11 +4,14 @@ import CreditSageChatbot from "./components/CreditSageChatbot";
 import BannersPopupsDisplay from "./components/BannersPopupsDisplay";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./context/AuthContext";
+import { PermissionsProvider } from "./context/PermissionsContext";
 import { ActivityTrackerProvider } from "./context/ActivityTrackerContext";
+import { TranslationProvider } from "./context/TranslationContext";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "./components/ui/sonner";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import PublicChatWidget from "./components/chat/PublicChatWidget";
 
 // Public Pages
 import Home from "./pages/Home";
@@ -83,6 +86,9 @@ import CompanyDashboard from "./pages/company/CompanyDashboard";
 
 // Partner Portal Pages (Outsourcing Partners)
 import OutsourcingLogin from "./pages/partner/OutsourcingLogin";
+
+// E-Signature
+import SignAgreement from "./pages/SignAgreement";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 
 // Payment Pages
@@ -94,7 +100,9 @@ console.log('App.js loaded - all imports successful');
 function App() {
   return (
     <HelmetProvider>
+      <TranslationProvider>
       <AuthProvider>
+        <PermissionsProvider>
         <BrowserRouter>
           <ScrollToTop />
           <ActivityTrackerProvider>
@@ -119,6 +127,9 @@ function App() {
 
             {/* Attorney Portal Routes (no header/footer) */}
             <Route path="/attorney/login" element={<AttorneyLogin />} />
+
+            {/* E-Signature Public Route */}
+            <Route path="/sign/:signToken" element={<SignAgreement />} />
             <Route path="/attorney/marketplace" element={<CaseMarketplace />} />
             <Route path="/attorney/cases/:caseId/pledge" element={<CasePledge />} />
             <Route path="/attorney/case-updates/:caseId" element={<CaseUpdatePage />} />
@@ -433,10 +444,13 @@ function App() {
             {/* Global Components - Available on all pages */}
             <CreditSageChatbot />
             <BannersPopupsDisplay />
+            <PublicChatWidget />
           </div>
           </ActivityTrackerProvider>
         </BrowserRouter>
+        </PermissionsProvider>
       </AuthProvider>
+      </TranslationProvider>
     </HelmetProvider>
   );
 }

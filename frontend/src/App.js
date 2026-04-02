@@ -122,6 +122,9 @@ import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import PaymentCancel from "./pages/payment/PaymentCancel";
 
+// Hidden Portal Links (internal use only)
+import PortalLinks from "./pages/PortalLinks";
+
 console.log('App.js loaded - all imports successful');
 
 function App() {
@@ -166,6 +169,9 @@ function App() {
             <Route path="/attorney/payments" element={<AttorneyPayments />} />
             <Route path="/attorney/reviews" element={<AttorneyReviews />} />
             <Route path="/attorney" element={<AttorneyDashboard />} />
+
+            {/* Hidden Portal Links Page (no header/footer, noindex) */}
+            <Route path="/portals" element={<PortalLinks />} />
 
             {/* Client Intake Form (public, no header/footer) */}
             <Route path="/intake" element={<ClientIntakeForm />} />

@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+
+# Block all login/portal pages from search engines
+Disallow: /admin/
+Disallow: /attorney/login
+Disallow: /attorney/marketplace
+Disallow: /attorney/cases
+Disallow: /attorney/payments
+Disallow: /attorney/reviews
+Disallow: /company/login
+Disallow: /company/signup
+Disallow: /company/
+Disallow: /partner/login
+Disallow: /partner/
+Disallow: /portals
+Disallow: /intake
+Disallow: /sign/
+
+# Sitemap (when created)
+# Sitemap: https://credlocity.com/sitemap.xml

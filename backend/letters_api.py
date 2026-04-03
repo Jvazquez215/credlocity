@@ -14,8 +14,12 @@ from pathlib import Path
 letters_router = APIRouter(prefix="/api/letters", tags=["Letters"])
 
 db_instance: AsyncIOMotorDatabase = None
-UPLOAD_DIR = Path("/app/backend/uploads/letters")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+UPLOAD_DIR = Path("uploads/letters")
+try:
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+except PermissionError:
+    UPLOAD_DIR = Path("/tmp/uploads/letters")
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 def set_db(database):
     global db_instance

@@ -166,7 +166,7 @@ async def upload_screenshot(ticket_number: str, file: UploadFile = File(...), au
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    upload_dir = f"/app/backend/uploads/bug_tickets/{ticket_number}"
+    upload_dir = f"uploads/bug_tickets/{ticket_number}"
     os.makedirs(upload_dir, exist_ok=True)
     file_ext = os.path.splitext(file.filename)[1] if file.filename else ".png"
     saved_name = f"screenshot_{uuid.uuid4().hex[:8]}{file_ext}"

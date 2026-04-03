@@ -224,7 +224,7 @@ async def upload_task_file(client_id: str, task_name: str, file: UploadFile = Fi
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
 
-    upload_dir = f"/app/backend/uploads/merger_docs/{client_id}/{task_name}"
+    upload_dir = f"uploads/merger_docs/{client_id}/{task_name}"
     os.makedirs(upload_dir, exist_ok=True)
     file_ext = os.path.splitext(file.filename)[1] if file.filename else ".bin"
     saved_name = f"{task_name}_{uuid.uuid4().hex[:8]}{file_ext}"

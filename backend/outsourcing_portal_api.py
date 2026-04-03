@@ -397,7 +397,7 @@ async def upload_document(
         file_url = await put_object(file_key, contents, file.content_type)
     except Exception:
         # Fallback: store locally
-        upload_dir = "/app/backend/uploads/outsourcing_docs"
+        upload_dir = "uploads/outsourcing_docs"
         os.makedirs(upload_dir, exist_ok=True)
         file_path = os.path.join(upload_dir, f"{uuid.uuid4()}{ext}")
         with open(file_path, "wb") as f:
@@ -905,7 +905,7 @@ async def upload_signed_agreement(
     if len(contents) > 20 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File must be under 20MB")
 
-    upload_dir = "/app/backend/uploads/outsourcing_agreements"
+    upload_dir = "uploads/outsourcing_agreements"
     os.makedirs(upload_dir, exist_ok=True)
     file_id = str(uuid.uuid4())
     file_path = os.path.join(upload_dir, f"{file_id}.pdf")
@@ -1055,7 +1055,7 @@ async def upload_credit_report(
     if len(contents) > 20 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File must be under 20MB")
 
-    upload_dir = "/app/backend/uploads/outsourcing_credit_reports"
+    upload_dir = "uploads/outsourcing_credit_reports"
     os.makedirs(upload_dir, exist_ok=True)
     file_id = str(uuid.uuid4())
     file_path = os.path.join(upload_dir, f"{file_id}.pdf")

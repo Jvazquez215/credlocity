@@ -8,7 +8,7 @@ import requests
 import os
 from uuid import uuid4
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://condescending-wozniak-3.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://credlocity.com').rstrip('/')
 
 # Test credentials
 TEST_EMAIL = "Admin@credlocity.com"

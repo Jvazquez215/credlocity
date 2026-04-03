@@ -386,7 +386,7 @@ class TestRBACAPI:
 def setup_test_env():
     """Setup test environment variables"""
     if not os.environ.get('REACT_APP_BACKEND_URL'):
-        os.environ['REACT_APP_BACKEND_URL'] = 'https://condescending-wozniak-3.preview.emergentagent.com'
+        os.environ['REACT_APP_BACKEND_URL'] = 'https://credlocity.com'
     yield
 
 

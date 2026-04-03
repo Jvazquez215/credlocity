@@ -176,7 +176,7 @@ async def generate_review_link(
     await db.review_links.insert_one(link_record)
     
     # Generate the full link URL
-    frontend_url = os.environ.get("FRONTEND_URL", "https://condescending-wozniak-3.preview.emergentagent.com")
+    frontend_url = os.environ.get("FRONTEND_URL", "https://credlocity.com")
     link_url = f"{frontend_url}/review/{token}"
     
     return {
@@ -238,7 +238,7 @@ async def generate_follow_up_link(
     await db.review_links.insert_one(link_record)
     
     # Generate the full link URL
-    frontend_url = os.environ.get("FRONTEND_URL", "https://condescending-wozniak-3.preview.emergentagent.com")
+    frontend_url = os.environ.get("FRONTEND_URL", "https://credlocity.com")
     link_url = f"{frontend_url}/review/{token}"
     
     return {

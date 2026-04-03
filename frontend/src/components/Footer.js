@@ -212,7 +212,7 @@ const Footer = () => {
           <p className="text-gray-400 text-sm mb-2">
             © {t('footer.copyright')}
           </p>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-400 text-sm">
             {t('footer.serving')}
           </p>
         </div>

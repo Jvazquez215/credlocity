@@ -267,7 +267,7 @@ export default function PublicChatWidget() {
 
   const primaryColor = settings?.widget_appearance?.primary_color || '#10B981';
   const position = settings?.widget_appearance?.position || 'bottom-right';
-  const positionClasses = position === 'bottom-left' ? 'left-4' : 'right-4';
+  const positionClasses = position === 'bottom-left' ? 'left-4' : 'right-24';
 
   return (
     <div className={`fixed bottom-4 ${positionClasses} z-50`} data-testid="public-chat-widget">
@@ -364,6 +364,7 @@ export default function PublicChatWidget() {
         className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110"
         style={{ backgroundColor: primaryColor }}
         data-testid="chat-bubble-btn"
+        aria-label="Open live chat"
       >
         {isOpen ? (
           <X className="w-6 h-6 text-white" />

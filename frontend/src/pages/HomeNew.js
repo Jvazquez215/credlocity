@@ -183,7 +183,13 @@ const HomeNew = () => {
           className="absolute inset-0 opacity-15"
           style={{ transform: `translateY(${parallaxOffset}px)` }}
         >
-          <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/7937764/pexels-photo-7937764.jpeg')] bg-cover bg-center"></div>
+          <img 
+            src="https://images.pexels.com/photos/7937764/pexels-photo-7937764.jpeg?auto=compress&cs=tinysrgb&w=1920" 
+            alt="Credit repair professional helping client" 
+            className="absolute inset-0 w-full h-full object-cover"
+            fetchPriority="high"
+            loading="eager"
+          />
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
@@ -789,7 +795,7 @@ const CreditIssueCard = ({ issue, index, isInView, t }) => {
         asChild
       >
         <Link to={issue.link}>
-          {t('home.learn_more')} 
+          {t('home.learn_more_about', { topic: issue.title }) || `Learn More About ${issue.title}`}
           <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
         </Link>
       </Button>

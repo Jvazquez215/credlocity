@@ -182,7 +182,7 @@ const Header = () => {
             </Button>
             <Button
               asChild
-              className="bg-secondary-green hover:bg-secondary-green/90 text-white"
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold"
               data-testid="header-start-trial-btn"
             >
               <a 
@@ -200,6 +200,7 @@ const Header = () => {
             className="lg:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="mobile-menu-toggle"
+            aria-label="Toggle mobile menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>

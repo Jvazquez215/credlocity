@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import CreditSageChatbot from "./components/CreditSageChatbot";
@@ -13,117 +14,125 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import PublicChatWidget from "./components/chat/PublicChatWidget";
 
-// Public Pages
-import Home from "./pages/Home";
+// Eager-loaded homepage
 import HomeNew from "./pages/HomeNew";
-import Outsourcing from "./pages/Outsourcing";
-import OutsourcingReviewDetail from "./pages/OutsourcingReviewDetail";
 import "./styles/homepage-animations.css";
-import Pricing from "./pages/Pricing";
-import CreditScores from "./pages/CreditScores";
-import WhyUs from "./pages/WhyUs";
+
+// Lazy-loaded pages (reduces initial bundle size significantly)
+// Public Pages
+const Home = lazy(() => import("./pages/Home"));
+const Outsourcing = lazy(() => import("./pages/Outsourcing"));
+const OutsourcingReviewDetail = lazy(() => import("./pages/OutsourcingReviewDetail"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const CreditScores = lazy(() => import("./pages/CreditScores"));
+const WhyUs = lazy(() => import("./pages/WhyUs"));
 
 // Partner Pages
-import PartnersHub from "./pages/partners/PartnersHub";
-import RealEstatePartner from "./pages/partners/RealEstatePartner";
-import MortgageProfessionals from "./pages/partners/MortgageProfessionals";
-import CarDealerships from "./pages/partners/CarDealerships";
-import SocialMediaInfluencers from "./pages/partners/SocialMediaInfluencers";
-import AttorneyPartners from "./pages/partners/AttorneyPartners";
-import CollectionRemoval from "./pages/credit-issues/CollectionRemoval";
-import LatePaymentRemoval from "./pages/credit-issues/LatePaymentRemoval";
-import ChargeOffRemoval from "./pages/credit-issues/ChargeOffRemoval";
-import BankruptcyCreditRepair from "./pages/credit-issues/BankruptcyCreditRepair";
-import IdentityTheftCreditRepair from "./pages/credit-issues/IdentityTheftCreditRepair";
-import HardInquiryRemoval from "./pages/credit-issues/HardInquiryRemoval";
-import ReportCompany from "./pages/ReportCompany";
-import SubmitComplaint from "./pages/SubmitComplaint";
-import SuccessStories from "./pages/SuccessStories";
-import SuccessStoriesDynamic from "./pages/SuccessStoriesDynamic";
-import SuccessStoryDetail from "./pages/SuccessStoryDetail";
-import BlogHub from "./pages/BlogHub";
-import BlogPost from "./pages/BlogPost";
-import Team from "./pages/Team";
-import AuthorProfile from "./pages/AuthorProfile";
-import FAQPage from "./pages/FAQPage";
-import LawsuitsPage from "./pages/LawsuitsPage";
-import LawsuitDetail from "./pages/LawsuitDetail";
-import PressReleasesPage from "./pages/PressReleasesPage";
-import PressReleaseDetail from "./pages/PressReleaseDetail";
-import AnnouncementDetail from "./pages/AnnouncementDetail";
-import PartnersPage from "./pages/PartnersPage";
-import PartnerDetail from "./pages/PartnerDetail";
-import LegalPage from "./pages/LegalPage";
-import AttorneySignup from "./pages/AttorneySignup";
-import CaseUpdatePage from "./pages/attorney/CaseUpdates";
-import AttorneyCases from "./pages/attorney/AttorneyCases";
-import AttorneyPayments from "./pages/attorney/AttorneyPayments";
-import AttorneyCaseDetail from "./pages/attorney/AttorneyCaseDetail";
-import CreditRepairReviews from "./pages/CreditRepairReviews";
-import ReviewDetailPage from "./pages/ReviewDetailPage";
-import ClientReviewFormEnhanced from "./pages/ClientReviewFormEnhanced";
+const PartnersHub = lazy(() => import("./pages/partners/PartnersHub"));
+const RealEstatePartner = lazy(() => import("./pages/partners/RealEstatePartner"));
+const MortgageProfessionals = lazy(() => import("./pages/partners/MortgageProfessionals"));
+const CarDealerships = lazy(() => import("./pages/partners/CarDealerships"));
+const SocialMediaInfluencers = lazy(() => import("./pages/partners/SocialMediaInfluencers"));
+const AttorneyPartners = lazy(() => import("./pages/partners/AttorneyPartners"));
+const CollectionRemoval = lazy(() => import("./pages/credit-issues/CollectionRemoval"));
+const LatePaymentRemoval = lazy(() => import("./pages/credit-issues/LatePaymentRemoval"));
+const ChargeOffRemoval = lazy(() => import("./pages/credit-issues/ChargeOffRemoval"));
+const BankruptcyCreditRepair = lazy(() => import("./pages/credit-issues/BankruptcyCreditRepair"));
+const IdentityTheftCreditRepair = lazy(() => import("./pages/credit-issues/IdentityTheftCreditRepair"));
+const HardInquiryRemoval = lazy(() => import("./pages/credit-issues/HardInquiryRemoval"));
+const SubmitComplaint = lazy(() => import("./pages/SubmitComplaint"));
+const SuccessStoriesDynamic = lazy(() => import("./pages/SuccessStoriesDynamic"));
+const SuccessStoryDetail = lazy(() => import("./pages/SuccessStoryDetail"));
+const BlogHub = lazy(() => import("./pages/BlogHub"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const Team = lazy(() => import("./pages/Team"));
+const AuthorProfile = lazy(() => import("./pages/AuthorProfile"));
+const FAQPage = lazy(() => import("./pages/FAQPage"));
+const LawsuitsPage = lazy(() => import("./pages/LawsuitsPage"));
+const LawsuitDetail = lazy(() => import("./pages/LawsuitDetail"));
+const PressReleasesPage = lazy(() => import("./pages/PressReleasesPage"));
+const PressReleaseDetail = lazy(() => import("./pages/PressReleaseDetail"));
+const AnnouncementDetail = lazy(() => import("./pages/AnnouncementDetail"));
+const PartnersPage = lazy(() => import("./pages/PartnersPage"));
+const PartnerDetail = lazy(() => import("./pages/PartnerDetail"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
+const AttorneySignup = lazy(() => import("./pages/AttorneySignup"));
+const CaseUpdatePage = lazy(() => import("./pages/attorney/CaseUpdates"));
+const AttorneyCases = lazy(() => import("./pages/attorney/AttorneyCases"));
+const AttorneyPayments = lazy(() => import("./pages/attorney/AttorneyPayments"));
+const AttorneyCaseDetail = lazy(() => import("./pages/attorney/AttorneyCaseDetail"));
+const CreditRepairReviews = lazy(() => import("./pages/CreditRepairReviews"));
+const ReviewDetailPage = lazy(() => import("./pages/ReviewDetailPage"));
+const ClientReviewFormEnhanced = lazy(() => import("./pages/ClientReviewFormEnhanced"));
 
-// Missing Pages - Header Navigation
-import HowItWorks from "./pages/HowItWorks";
-import FreeTrialPage from "./pages/FreeTrialPage";
-import FraudRemoval from "./pages/credit-issues/FraudRemoval";
-import HumanTraffickingBlock from "./pages/credit-issues/HumanTraffickingBlock";
-import CreditRepairScams from "./pages/CreditRepairScams";
-import CreditTrackerApp from "./pages/CreditTrackerApp";
+// Header Navigation Pages
+const HowItWorks = lazy(() => import("./pages/HowItWorks"));
+const FreeTrialPage = lazy(() => import("./pages/FreeTrialPage"));
+const FraudRemoval = lazy(() => import("./pages/credit-issues/FraudRemoval"));
+const HumanTraffickingBlock = lazy(() => import("./pages/credit-issues/HumanTraffickingBlock"));
+const CreditRepairScams = lazy(() => import("./pages/CreditRepairScams"));
+const CreditTrackerApp = lazy(() => import("./pages/CreditTrackerApp"));
 
 // Education Pages
-import EducationHub from "./pages/education/EducationHub";
-import CreditBuilding from "./pages/education/CreditBuilding";
-import CreditReports from "./pages/education/CreditReports";
-import RepairMethods from "./pages/education/RepairMethods";
-import DebtManagement from "./pages/education/DebtManagement";
-import FinancialWellness from "./pages/education/FinancialWellness";
-import FCRAGuide from "./pages/education/FCRAGuide";
-import FDCPAGuide from "./pages/education/FDCPAGuide";
-import CROAGuide from "./pages/education/CROAGuide";
-import TSRCompliance from "./pages/education/TSRCompliance";
-import FCRA605B from "./pages/education/FCRA605B";
+const EducationHub = lazy(() => import("./pages/education/EducationHub"));
+const CreditBuilding = lazy(() => import("./pages/education/CreditBuilding"));
+const CreditReports = lazy(() => import("./pages/education/CreditReports"));
+const RepairMethods = lazy(() => import("./pages/education/RepairMethods"));
+const DebtManagement = lazy(() => import("./pages/education/DebtManagement"));
+const FinancialWellness = lazy(() => import("./pages/education/FinancialWellness"));
+const FCRAGuide = lazy(() => import("./pages/education/FCRAGuide"));
+const FDCPAGuide = lazy(() => import("./pages/education/FDCPAGuide"));
+const CROAGuide = lazy(() => import("./pages/education/CROAGuide"));
+const TSRCompliance = lazy(() => import("./pages/education/TSRCompliance"));
+const FCRA605B = lazy(() => import("./pages/education/FCRA605B"));
 
 // Competitor Comparisons
-import CompetitorComparison from "./pages/comparisons/CompetitorComparison";
+const CompetitorComparison = lazy(() => import("./pages/comparisons/CompetitorComparison"));
 
 // Calculator Tools
-import CalculatorPage from "./pages/tools/CalculatorPage";
+const CalculatorPage = lazy(() => import("./pages/tools/CalculatorPage"));
 
-// Admin Pages  
-import AdminLogin from "./pages/admin/Login";
-import AdminDashboard from "./pages/admin/Dashboard";
-import ClientIntakeForm from "./pages/public/ClientIntakeForm";
+// Admin Pages
+const AdminLogin = lazy(() => import("./pages/admin/Login"));
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const ClientIntakeForm = lazy(() => import("./pages/public/ClientIntakeForm"));
 
 // Admin Partners Pages
-import PartnersList from "./pages/admin/partners/PartnersList";
-import PartnerForm from "./pages/admin/partners/PartnerForm";
+const PartnersList = lazy(() => import("./pages/admin/partners/PartnersList"));
+const PartnerForm = lazy(() => import("./pages/admin/partners/PartnerForm"));
 
 // Attorney Portal Pages
-import AttorneyLogin from "./pages/attorney/AttorneyLogin";
-import AttorneyDashboard from "./pages/attorney/AttorneyDashboard";
-import CaseMarketplace from "./pages/attorney/CaseMarketplace";
-import CasePledge from "./pages/attorney/CasePledge";
-import AttorneyReviews from "./pages/attorney/AttorneyReviews";
+const AttorneyLogin = lazy(() => import("./pages/attorney/AttorneyLogin"));
+const AttorneyDashboard = lazy(() => import("./pages/attorney/AttorneyDashboard"));
+const CaseMarketplace = lazy(() => import("./pages/attorney/CaseMarketplace"));
+const CasePledge = lazy(() => import("./pages/attorney/CasePledge"));
+const AttorneyReviews = lazy(() => import("./pages/attorney/AttorneyReviews"));
 
 // Company Portal Pages (Credit Repair Companies)
-import CompanyLogin from "./pages/company/CompanyLogin";
-import CompanySignup from "./pages/company/CompanySignup";
-import CompanyDashboard from "./pages/company/CompanyDashboard";
+const CompanyLogin = lazy(() => import("./pages/company/CompanyLogin"));
+const CompanySignup = lazy(() => import("./pages/company/CompanySignup"));
+const CompanyDashboard = lazy(() => import("./pages/company/CompanyDashboard"));
 
 // Partner Portal Pages (Outsourcing Partners)
-import OutsourcingLogin from "./pages/partner/OutsourcingLogin";
+const OutsourcingLogin = lazy(() => import("./pages/partner/OutsourcingLogin"));
 
 // E-Signature
-import SignAgreement from "./pages/SignAgreement";
-import PartnerDashboard from "./pages/partner/PartnerDashboard";
+const SignAgreement = lazy(() => import("./pages/SignAgreement"));
+const PartnerDashboard = lazy(() => import("./pages/partner/PartnerDashboard"));
 
 // Payment Pages
-import PaymentSuccess from "./pages/payment/PaymentSuccess";
-import PaymentCancel from "./pages/payment/PaymentCancel";
+const PaymentSuccess = lazy(() => import("./pages/payment/PaymentSuccess"));
+const PaymentCancel = lazy(() => import("./pages/payment/PaymentCancel"));
 
 // Hidden Portal Links (internal use only)
-import PortalLinks from "./pages/PortalLinks";
+const PortalLinks = lazy(() => import("./pages/PortalLinks"));
+
+// Loading spinner for lazy-loaded routes
+const LazySpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+  </div>
+);
 
 console.log('App.js loaded - all imports successful');
 
@@ -137,6 +146,7 @@ function App() {
           <ScrollToTop />
           <ActivityTrackerProvider>
             <div className="App">
+              <Suspense fallback={<LazySpinner />}>
               <Routes>
               {/* Admin Routes (no header/footer) - Must come FIRST to avoid being caught by /* */}
               <Route path="/admin/login" element={<AdminLogin />} />
@@ -518,6 +528,7 @@ function App() {
             <Route path="/tools/retirement-calculator" element={<><Header /><CalculatorPage type="retirement" /><Footer /></>} />
 
             </Routes>
+            </Suspense>
             <Toaster />
             
             {/* Global Components - Available on all pages */}

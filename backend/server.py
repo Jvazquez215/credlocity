@@ -22,6 +22,8 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 from creditsage_bot import CreditSageBot
+import cloudinary
+import cloudinary.uploader
 
 
 # Helper function to remove MongoDB _id field
@@ -82,12 +84,21 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Media upload directory
+# Media upload directory (fallback for local dev)
 MEDIA_DIR = ROOT_DIR / "media"
 MEDIA_DIR.mkdir(exist_ok=True)
 
-# Mount static files for media access
+# Mount static files for media access (local fallback)
 app.mount("/media", StaticFiles(directory=str(MEDIA_DIR)), name="media")
+
+# Cloudinary configuration
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True
+)
+USE_CLOUDINARY = bool(os.getenv("CLOUDINARY_CLOUD_NAME") and os.getenv("CLOUDINARY_API_KEY") and os.getenv("CLOUDINARY_API_SECRET"))
 
 
 # ============ AUTH HELPER ============
@@ -353,35 +364,56 @@ async def upload_media(
     folder: str = Form("/"),
     current_user: dict = Depends(get_current_user)
 ):
-    """Enhanced media upload with image dimension detection"""
+    """Enhanced media upload with Cloudinary (or local fallback)"""
     try:
-        # Generate unique filename
-        file_ext = Path(file.filename).suffix.lower()
-        unique_filename = f"{uuid.uuid4()}{file_ext}"
-        file_path = MEDIA_DIR / unique_filename
-        
         # Read file content
         content = await file.read()
-        
-        # Save file
-        with open(file_path, "wb") as buffer:
-            buffer.write(content)
+        file_ext = Path(file.filename).suffix.lower()
+        unique_filename = f"{uuid.uuid4()}{file_ext}"
         
         # Determine file type and get dimensions for images
         mime_type = file.content_type or "application/octet-stream"
+        width, height = None, None
         if mime_type.startswith('image'):
             file_type = 'image'
             try:
                 img = Image.open(io.BytesIO(content))
                 width, height = img.size
             except Exception:
-                width, height = None, None
+                pass
         elif mime_type.startswith('video'):
             file_type = 'video'
-            width, height = None, None
         else:
             file_type = 'document'
-            width, height = None, None
+        
+        # Upload to Cloudinary or save locally
+        if USE_CLOUDINARY:
+            # Determine Cloudinary resource type
+            resource_type = "image" if file_type == "image" else "raw" if file_type == "document" else "video"
+            
+            # Upload to Cloudinary
+            cloudinary_folder = f"credlocity/{folder.strip('/')}" if folder and folder != "/" else "credlocity"
+            result = cloudinary.uploader.upload(
+                io.BytesIO(content),
+                folder=cloudinary_folder,
+                public_id=unique_filename.rsplit('.', 1)[0],
+                resource_type=resource_type,
+                overwrite=True
+            )
+            
+            file_url = result.get("secure_url", result.get("url", ""))
+            
+            # Get dimensions from Cloudinary response if we didn't get them locally
+            if not width and result.get("width"):
+                width = result["width"]
+            if not height and result.get("height"):
+                height = result["height"]
+        else:
+            # Local fallback
+            file_path = MEDIA_DIR / unique_filename
+            with open(file_path, "wb") as buffer:
+                buffer.write(content)
+            file_url = f"/media/{unique_filename}"
         
         # Create enhanced media record
         media_obj = MediaEnhanced(
@@ -390,7 +422,7 @@ async def upload_media(
             file_type=file_type,
             mime_type=mime_type,
             file_size=len(content),
-            url=f"/media/{unique_filename}",
+            url=file_url,
             alt_text=alt_text,
             caption=caption,
             folder=folder,
@@ -406,6 +438,7 @@ async def upload_media(
         await db.media.insert_one(doc)
         return media_obj
     except Exception as e:
+        print(f"[MEDIA UPLOAD ERROR] {e}")
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 

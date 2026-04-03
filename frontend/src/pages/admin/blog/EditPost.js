@@ -699,6 +699,22 @@ const EditPost = () => {
                 />
                 <label className="text-sm font-medium text-gray-700">📰 Mark as News (RSS & News Sitemap)</label>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  📅 Publish Date
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.publish_date ? new Date(formData.publish_date).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    publish_date: e.target.value ? new Date(e.target.value).toISOString() : null
+                  }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-400 mt-1">Change the publish date (e.g., to preserve original date when migrating posts)</p>
+              </div>
             </div>
           )}
         </div>

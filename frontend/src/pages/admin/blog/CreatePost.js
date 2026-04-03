@@ -212,7 +212,9 @@ const CreatePost = () => {
       const postData = {
         ...formData,
         status,
-        publish_date: status === 'published' ? new Date().toISOString() : null
+        publish_date: status === 'published' 
+          ? (formData.publish_date || new Date().toISOString()) 
+          : formData.publish_date || null
       };
 
       await api.post('/blog/posts', postData);
@@ -838,6 +840,22 @@ const CreatePost = () => {
                 <label className="text-sm font-medium text-gray-700">
                   📰 Mark as News (RSS & News Sitemap)
                 </label>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  📅 Publish Date <span className="text-gray-400 font-normal">(leave blank to use current date when publishing)</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.publish_date ? new Date(formData.publish_date).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    publish_date: e.target.value ? new Date(e.target.value).toISOString() : null
+                  }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-400 mt-1">Use this to set a custom publish date (e.g., when migrating older posts)</p>
               </div>
 
               <div>

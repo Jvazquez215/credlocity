@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { Search, Newspaper, Megaphone, Filter, Calendar, ChevronRight } from 'lucide-react';
+import { Search, Newspaper, Megaphone, Filter, Calendar, ChevronRight, Rss } from 'lucide-react';
 
 const PressReleasesPage = () => {
   const navigate = useNavigate();
@@ -126,9 +126,19 @@ const PressReleasesPage = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               News & Announcements
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
               Stay updated with the latest news, press releases, and company announcements from Credlocity.
             </p>
+            <a
+              href={`${process.env.REACT_APP_BACKEND_URL}/api/press-releases/rss`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+              title="Subscribe to Press Releases via RSS"
+            >
+              <Rss size={16} />
+              RSS Feed
+            </a>
           </div>
 
           {/* Filters and Search */}

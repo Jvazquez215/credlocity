@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { Rss } from 'lucide-react';
 import api from '../utils/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -105,9 +106,21 @@ const BlogHub = () => {
             <h1 className="font-cinzel text-4xl md:text-5xl font-bold mb-4 text-center">
               Credlocity Blog
             </h1>
-            <p className="text-xl text-center text-blue-100 max-w-3xl mx-auto">
+            <p className="text-xl text-center text-blue-100 max-w-3xl mx-auto mb-6">
               Expert credit repair tips, guides, and strategies to help you improve your credit score and achieve financial freedom
             </p>
+            <div className="flex justify-center">
+              <a
+                href={`${process.env.REACT_APP_BACKEND_URL}/api/rss.xml`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white px-4 py-2 rounded-lg text-sm font-medium transition backdrop-blur-sm"
+                title="Subscribe via RSS"
+              >
+                <Rss size={16} />
+                RSS Feed
+              </a>
+            </div>
           </div>
         </div>
 

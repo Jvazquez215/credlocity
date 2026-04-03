@@ -29,7 +29,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         {/* Company Info Header */}
         <div className="mb-8 pb-8 border-b border-gray-800">
-          <h2 className="font-cinzel text-2xl font-bold mb-4">Credlocity</h2>
+          <img src="/logo.png" alt="Credlocity" className="h-10 w-auto mb-4 brightness-0 invert" />
           <p className="text-gray-400 mb-4">{t('footer.tagline')}</p>
           <div className="space-y-2 text-gray-400">
             <div className="flex items-center space-x-2">
@@ -57,12 +57,19 @@ const Footer = () => {
               <li><Link to="/debt-management" className="text-gray-400 hover:text-white transition text-sm">{t('footer.debt_management')}</Link></li>
               <li><Link to="/credit-building" className="text-gray-400 hover:text-white transition text-sm">{t('footer.credit_building')}</Link></li>
               <li><Link to="/financial-wellness" className="text-gray-400 hover:text-white transition text-sm">{t('footer.financial_wellness')}</Link></li>
-              <li><Link to="/education-hub" className="text-gray-400 hover:text-white transition text-sm">{t('footer.education_hub')}</Link></li>
+              <li><Link to="/credit-repair-laws" className="text-gray-400 hover:text-white transition text-sm">{t('footer.education_hub')}</Link></li>
               <li><Link to="/fcra-guide" className="text-gray-400 hover:text-white transition text-sm">{t('footer.fcra_guide')}</Link></li>
+              <li className="pl-3"><Link to="/fcra-605b-block" className="text-gray-400 hover:text-white transition text-sm">{t('footer.fcra_605b')}</Link></li>
+              <li className="pl-6"><Link to="/fraud-removal" className="text-gray-400 hover:text-white transition text-sm">Fraud Removal (605B)</Link></li>
               <li><Link to="/fdcpa-guide" className="text-gray-400 hover:text-white transition text-sm">{t('footer.fdcpa_guide')}</Link></li>
+              <li className="pl-3"><Link to="/collection-removal" className="text-gray-400 hover:text-white transition text-sm">Collection Removal</Link></li>
+              <li className="pl-3"><Link to="/how-to-dispute-collections" className="text-gray-400 hover:text-white transition text-sm font-medium">How to Dispute Collections</Link></li>
               <li><Link to="/croa-guide" className="text-gray-400 hover:text-white transition text-sm">{t('footer.croa_guide')}</Link></li>
               <li><Link to="/tsr-compliance" className="text-gray-400 hover:text-white transition text-sm">{t('footer.tsr_compliance')}</Link></li>
-              <li><Link to="/fcra-605b-block" className="text-gray-400 hover:text-white transition text-sm">{t('footer.fcra_605b')}</Link></li>
+              <li><Link to="/late-payment-removal" className="text-gray-400 hover:text-white transition text-sm">Late Payment Removal</Link></li>
+              <li><Link to="/human-trafficking-credit-block" className="text-gray-400 hover:text-white transition text-sm">Human Trafficking Credit Block</Link></li>
+              <li><Link to="/credit-repair-scams" className="text-gray-400 hover:text-white transition text-sm">Credit Repair Scams</Link></li>
+              <li><Link to="/store" className="text-gray-400 hover:text-white transition text-sm">Credlocity Store</Link></li>
             </ul>
           </div>
 
@@ -85,7 +92,11 @@ const Footer = () => {
           <div>
             <h3 className="font-cinzel font-semibold text-lg mb-4">{t('footer.credlocity')}</h3>
             <ul className="space-y-2">
-              <li><Link to="/success-stories" className="text-gray-400 hover:text-white transition text-sm font-medium">{t('footer.success_stories')}</Link></li>
+              <li><Link to="/about-credlocity" className="text-gray-400 hover:text-white transition text-sm font-medium">About Credlocity</Link></li>
+              <li><Link to="/success-stories" className="text-gray-400 hover:text-white transition text-sm">{t('footer.success_stories')}</Link></li>
+              <li><Link to="/free-letters" className="text-gray-400 hover:text-white transition text-sm">Free Downloadable Letters</Link></li>
+              <li><Link to="/free-credit-report-review" className="text-gray-400 hover:text-white transition text-sm font-medium">Free Credit Report Review</Link></li>
+              <li><Link to="/609-dispute-letter" className="text-gray-400 hover:text-white transition text-sm">609 Dispute Letter Guide</Link></li>
               <li><Link to="/lawsuits" className="text-gray-400 hover:text-white transition text-sm">{t('footer.lawsuits_filed')}</Link></li>
               <li><Link to="/press-releases" className="text-gray-400 hover:text-white transition text-sm">{t('footer.press_releases')}</Link></li>
               
@@ -101,7 +112,17 @@ const Footer = () => {
               <li><Link to="/partners" className="text-gray-400 hover:text-white transition text-sm">{t('footer.credlocity_partners')}</Link></li>
               <li><Link to="/become-a-partner" className="text-gray-400 hover:text-white transition text-sm">{t('footer.become_partner')}</Link></li>
               <li><Link to="/outsourcing" className="text-gray-400 hover:text-white transition text-sm">{t('footer.outsourcing_services')}</Link></li>
+              <li><Link to="/credit-builder-store" className="text-gray-400 hover:text-white transition text-sm">Credit Builder Accounts</Link></li>
+              <li><Link to="/affiliate-partners" className="text-gray-400 hover:text-white transition text-sm">Affiliate Partners</Link></li>
+              <li><Link to="/school" className="text-gray-400 hover:text-white transition text-sm" data-testid="footer-school-link">CROA Ethics School</Link></li>
             </ul>
+            
+            {/* Locations */}
+            <div className="mt-6" data-testid="footer-locations-heading">
+              <Link to="/locations" className="text-gray-300 hover:text-white transition font-semibold text-sm flex items-center gap-1">
+                Locations <span className="text-xs text-gray-500">- View All</span>
+              </Link>
+            </div>
           </div>
 
           {/* Column 4: Credit Tools */}
@@ -212,7 +233,7 @@ const Footer = () => {
           <p className="text-gray-400 text-sm mb-2">
             © {t('footer.copyright')}
           </p>
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-500 text-sm">
             {t('footer.serving')}
           </p>
         </div>

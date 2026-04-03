@@ -1,22 +1,25 @@
 import { lazy, Suspense } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import CreditSageChatbot from "./components/CreditSageChatbot";
-import BannersPopupsDisplay from "./components/BannersPopupsDisplay";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./context/AuthContext";
 import { PermissionsProvider } from "./context/PermissionsContext";
 import { ActivityTrackerProvider } from "./context/ActivityTrackerContext";
 import { TranslationProvider } from "./context/TranslationContext";
+import { LeadCaptureProvider } from "./context/LeadCaptureContext";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "./components/ui/sonner";
+import FloatingBugReport from "./components/FloatingBugReport";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import PublicChatWidget from "./components/chat/PublicChatWidget";
 
 // Eager-loaded homepage
 import HomeNew from "./pages/HomeNew";
 import "./styles/homepage-animations.css";
+
+// Lazy-loaded global components
+const BannersPopupsDisplay = lazy(() => import("./components/BannersPopupsDisplay"));
+const PublicChatWidget = lazy(() => import("./components/chat/PublicChatWidget"));
 
 // Lazy-loaded pages (reduces initial bundle size significantly)
 // Public Pages
@@ -26,6 +29,8 @@ const OutsourcingReviewDetail = lazy(() => import("./pages/OutsourcingReviewDeta
 const Pricing = lazy(() => import("./pages/Pricing"));
 const CreditScores = lazy(() => import("./pages/CreditScores"));
 const WhyUs = lazy(() => import("./pages/WhyUs"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
+const AboutCredlocity = lazy(() => import("./pages/AboutCredlocity"));
 
 // Partner Pages
 const PartnersHub = lazy(() => import("./pages/partners/PartnersHub"));
@@ -72,6 +77,7 @@ const FraudRemoval = lazy(() => import("./pages/credit-issues/FraudRemoval"));
 const HumanTraffickingBlock = lazy(() => import("./pages/credit-issues/HumanTraffickingBlock"));
 const CreditRepairScams = lazy(() => import("./pages/CreditRepairScams"));
 const CreditTrackerApp = lazy(() => import("./pages/CreditTrackerApp"));
+const SchoolApp = lazy(() => import("./pages/SchoolApp"));
 
 // Education Pages
 const EducationHub = lazy(() => import("./pages/education/EducationHub"));
@@ -85,15 +91,27 @@ const FDCPAGuide = lazy(() => import("./pages/education/FDCPAGuide"));
 const CROAGuide = lazy(() => import("./pages/education/CROAGuide"));
 const TSRCompliance = lazy(() => import("./pages/education/TSRCompliance"));
 const FCRA605B = lazy(() => import("./pages/education/FCRA605B"));
+const FreeLetters = lazy(() => import("./pages/FreeLetters"));
+const LetterTemplatePage = lazy(() => import("./pages/LetterTemplatePage"));
 
 // Competitor Comparisons
 const CompetitorComparison = lazy(() => import("./pages/comparisons/CompetitorComparison"));
+const CreditRepairReviewsHub = lazy(() => import("./pages/comparisons/CreditRepairReviews"));
+const SwitchAndSave = lazy(() => import("./pages/SwitchAndSave"));
+const ScamChecker = lazy(() => import("./pages/ScamChecker"));
+const FreeCreditReportReview = lazy(() => import("./pages/FreeCreditReportReview"));
+const DisputeLetter609 = lazy(() => import("./pages/DisputeLetter609"));
+const DisputeCollectionsHub = lazy(() => import("./pages/guides/DisputeCollectionsHub"));
+const DisputeCollectionAgency = lazy(() => import("./pages/guides/DisputeCollectionAgency"));
 
 // Calculator Tools
 const CalculatorPage = lazy(() => import("./pages/tools/CalculatorPage"));
+const CreditScoreSimulator = lazy(() => import("./pages/tools/CreditScoreSimulator"));
 
 // Admin Pages
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
+const ForgotPassword = lazy(() => import("./pages/admin/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/admin/ResetPassword"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const ClientIntakeForm = lazy(() => import("./pages/public/ClientIntakeForm"));
 
@@ -108,6 +126,11 @@ const CaseMarketplace = lazy(() => import("./pages/attorney/CaseMarketplace"));
 const CasePledge = lazy(() => import("./pages/attorney/CasePledge"));
 const AttorneyReviews = lazy(() => import("./pages/attorney/AttorneyReviews"));
 
+// CRO Portal Pages
+const CROLogin = lazy(() => import("./pages/cro/CROLogin"));
+const CRODashboard = lazy(() => import("./pages/cro/CRODashboard"));
+const CROLandingPage = lazy(() => import("./pages/cro/CROLandingPage"));
+
 // Company Portal Pages (Credit Repair Companies)
 const CompanyLogin = lazy(() => import("./pages/company/CompanyLogin"));
 const CompanySignup = lazy(() => import("./pages/company/CompanySignup"));
@@ -119,6 +142,25 @@ const OutsourcingLogin = lazy(() => import("./pages/partner/OutsourcingLogin"));
 // E-Signature
 const SignAgreement = lazy(() => import("./pages/SignAgreement"));
 const PartnerDashboard = lazy(() => import("./pages/partner/PartnerDashboard"));
+
+// E-Books / Store
+const EbooksPage = lazy(() => import("./pages/EbooksPage"));
+const EbookDetailPage = lazy(() => import("./pages/EbookDetailPage"));
+
+// Credit Builder Public Store
+const CreditBuilderPublicStore = lazy(() => import("./pages/public/CreditBuilderPublicStore"));
+const AffiliateLandingPage = lazy(() => import("./pages/public/AffiliateLandingPage"));
+const AffiliateDirectory = lazy(() => import("./pages/public/AffiliateDirectory"));
+const LocalLandingPage = lazy(() => import("./pages/public/LocalLandingPage"));
+const LocationsPage = lazy(() => import("./pages/LocationsPage"));
+const CityFirstTimeHomeBuyer = lazy(() => import("./pages/CityFirstTimeHomeBuyer"));
+
+// Collection Payment Portal
+const CollectionPaymentPortal = lazy(() => import("./pages/public/CollectionPaymentPortal"));
+
+// Audit Dashboard
+const AuditDashboard = lazy(() => import("./pages/admin/audit/AuditDashboard"));
+const LeadsPage = lazy(() => import("./pages/admin/leads/LeadsPage"));
 
 // Payment Pages
 const PaymentSuccess = lazy(() => import("./pages/payment/PaymentSuccess"));
@@ -140,6 +182,7 @@ function App() {
   return (
     <HelmetProvider>
       <TranslationProvider>
+      <LeadCaptureProvider>
       <AuthProvider>
         <PermissionsProvider>
         <BrowserRouter>
@@ -150,6 +193,8 @@ function App() {
               <Routes>
               {/* Admin Routes (no header/footer) - Must come FIRST to avoid being caught by /* */}
               <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/forgot-password" element={<ForgotPassword />} />
+              <Route path="/admin/reset-password" element={<ResetPassword />} />
               <Route path="/admin/*" element={<AdminDashboard />} />
 
             {/* Payment Routes (no header/footer) */}
@@ -164,6 +209,10 @@ function App() {
             {/* Partner Portal Routes (Outsourcing Partners) */}
             <Route path="/partner/login" element={<OutsourcingLogin />} />
             <Route path="/partner/*" element={<PartnerDashboard />} />
+
+            {/* CRO Portal Routes (Credit Repair Organizations) */}
+            <Route path="/cro/login" element={<CROLogin />} />
+            <Route path="/cro/*" element={<CRODashboard />} />
 
             {/* Attorney Portal Routes (no header/footer) */}
             <Route path="/attorney/login" element={<AttorneyLogin />} />
@@ -192,9 +241,13 @@ function App() {
             <Route path="/attorney/signup" element={<AttorneySignup />} />
             <Route path="/attorneys/apply" element={<AttorneySignup />} />
 
+            {/* CRO Landing Page (public, own design) */}
+            <Route path="/cro-partnership" element={<CROLandingPage />} />
+
             {/* Blog Routes (have their own header/footer) */}
             <Route path="/blog" element={<BlogHub />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/post/:slug" element={<BlogPost />} />
 
             {/* Team Routes (have their own header/footer) */}
             <Route path="/team" element={<Team />} />
@@ -310,6 +363,26 @@ function App() {
                 <>
                   <Header />
                   <WhyUs />
+                  <Footer />
+                </>
+              }
+            />
+            <Route
+              path="/about-us"
+              element={
+                <>
+                  <Header />
+                  <AboutUs />
+                  <Footer />
+                </>
+              }
+            />
+            <Route
+              path="/about-credlocity"
+              element={
+                <>
+                  <Header />
+                  <AboutCredlocity />
                   <Footer />
                 </>
               }
@@ -490,8 +563,17 @@ function App() {
             <Route path="/credit-repair-scams" element={<><Header /><CreditRepairScams /><Footer /></>} />
             <Route path="/credit-tracker-app" element={<><Header /><CreditTrackerApp /><Footer /></>} />
 
+            {/* Store / E-Books Pages */}
+            <Route path="/store" element={<><Header /><EbooksPage /><Footer /></>} />
+            <Route path="/store/:slug" element={<><Header /><EbookDetailPage /><Footer /></>} />
+            <Route path="/ebooks" element={<Navigate to="/store" replace />} />
+
+            {/* Credit Builder Public Store */}
+            <Route path="/credit-builder-store" element={<><Header /><CreditBuilderPublicStore /><Footer /></>} />
+
             {/* Education Pages */}
             <Route path="/education-hub" element={<><Header /><EducationHub /><Footer /></>} />
+            <Route path="/credit-repair-laws" element={<><Header /><EducationHub /><Footer /></>} />
             <Route path="/credit-building" element={<><Header /><CreditBuilding /><Footer /></>} />
             <Route path="/credit-reports" element={<><Header /><CreditReports /><Footer /></>} />
             <Route path="/repair-methods" element={<><Header /><RepairMethods /><Footer /></>} />
@@ -503,7 +585,18 @@ function App() {
             <Route path="/tsr-compliance" element={<><Header /><TSRCompliance /><Footer /></>} />
             <Route path="/fcra-605b-block" element={<><Header /><FCRA605B /><Footer /></>} />
 
+            {/* Free Letters Page */}
+            <Route path="/free-letters" element={<><Header /><FreeLetters /><Footer /></>} />
+            <Route path="/free-letters/:slug" element={<><Header /><LetterTemplatePage /><Footer /></>} />
+
             {/* Competitor Comparisons */}
+            <Route path="/credit-repair-reviews-hub" element={<><Header /><CreditRepairReviewsHub /><Footer /></>} />
+            <Route path="/switch" element={<><Header /><SwitchAndSave /><Footer /></>} />
+            <Route path="/scam-checker" element={<><Header /><ScamChecker /><Footer /></>} />
+            <Route path="/free-credit-report-review" element={<><Header /><FreeCreditReportReview /><Footer /></>} />
+            <Route path="/609-dispute-letter" element={<><Header /><DisputeLetter609 /><Footer /></>} />
+            <Route path="/how-to-dispute-collections" element={<><Header /><DisputeCollectionsHub /><Footer /></>} />
+            <Route path="/dispute/:slug" element={<><Header /><DisputeCollectionAgency /><Footer /></>} />
             <Route path="/vs-lexington-law" element={<><Header /><CompetitorComparison competitor="lexington-law" /><Footer /></>} />
             <Route path="/vs-creditrepair" element={<><Header /><CompetitorComparison competitor="creditrepair-com" /><Footer /></>} />
             <Route path="/vs-credit-people" element={<><Header /><CompetitorComparison competitor="credit-people" /><Footer /></>} />
@@ -512,7 +605,8 @@ function App() {
             <Route path="/vs-white-jacobs" element={<><Header /><CompetitorComparison competitor="white-jacobs" /><Footer /></>} />
 
             {/* Calculator Tools */}
-            <Route path="/tools/credit-score-calculator" element={<><Header /><CalculatorPage type="credit-score" /><Footer /></>} />
+            <Route path="/tools/credit-score-simulator" element={<><Header /><CreditScoreSimulator /><Footer /></>} />
+            <Route path="/tools/credit-score-calculator" element={<><Header /><CreditScoreSimulator /><Footer /></>} />
             <Route path="/tools/debt-to-income-calculator" element={<><Header /><CalculatorPage type="debt-to-income" /><Footer /></>} />
             <Route path="/tools/credit-utilization-calculator" element={<><Header /><CalculatorPage type="credit-utilization" /><Footer /></>} />
             <Route path="/tools/loan-payment-calculator" element={<><Header /><CalculatorPage type="loan-payment" /><Footer /></>} />
@@ -527,19 +621,45 @@ function App() {
             <Route path="/tools/auto-loan-calculator" element={<><Header /><CalculatorPage type="auto-loan" /><Footer /></>} />
             <Route path="/tools/retirement-calculator" element={<><Header /><CalculatorPage type="retirement" /><Footer /></>} />
 
+            {/* Affiliate Landing Pages (standalone, no header/footer) */}
+            <Route path="/p/:slug" element={<AffiliateLandingPage />} />
+
+            {/* Affiliate Directory (with header/footer) */}
+            <Route path="/affiliate-partners" element={<><Header /><AffiliateDirectory /><Footer /></>} />
+
+            {/* Locations Hub Page */}
+            <Route path="/locations" element={<><Header /><LocationsPage /><Footer /></>} />
+
+            {/* First-Time Home Buyer Resource (all cities) */}
+            <Route path="/:slug/first-time-home-buyer" element={<><Header /><CityFirstTimeHomeBuyer /><Footer /></>} />
+
+            {/* School Routes */}
+            <Route path="/school" element={<SchoolApp />} />
+            <Route path="/school/:page" element={<SchoolApp />} />
+            <Route path="/school/:page/:courseId" element={<SchoolApp />} />
+
+            {/* Local Landing Pages (with header/footer) - must be last catch-all */}
+            <Route path="/:slug" element={<><Header /><LocalLandingPage /><Footer /></>} />
+
+            {/* Collection Payment Portal (standalone, no header/footer) */}
+            <Route path="/pay/:token" element={<CollectionPaymentPortal />} />
+
             </Routes>
             </Suspense>
             <Toaster />
             
             {/* Global Components - Available on all pages */}
-            <CreditSageChatbot />
-            <BannersPopupsDisplay />
-            <PublicChatWidget />
+            <FloatingBugReport />
+            <Suspense fallback={null}>
+              <BannersPopupsDisplay />
+              <PublicChatWidget />
+            </Suspense>
           </div>
           </ActivityTrackerProvider>
         </BrowserRouter>
         </PermissionsProvider>
       </AuthProvider>
+      </LeadCaptureProvider>
       </TranslationProvider>
     </HelmetProvider>
   );

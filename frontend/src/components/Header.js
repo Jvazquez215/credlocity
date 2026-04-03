@@ -1,48 +1,72 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X, ChevronDown, Globe } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, ChevronDown, Globe, MapPin } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useTranslation } from '../context/TranslationContext';
+import { useLeadCapture } from '../context/LeadCaptureContext';
+
+const LOCATIONS = [
+  { city: 'Philadelphia', state: 'PA', slug: '/credit-repair-philadelphia' },
+  { city: 'Atlanta', state: 'GA', slug: '/credit-repair-atlanta' },
+  { city: 'New York', state: 'NY', slug: '/credit-repair-new-york' },
+  { city: 'Trenton', state: 'NJ', slug: '/credit-repair-trenton' },
+  { city: 'Boise', state: 'ID', slug: '/credit-repair-boise' },
+  { city: 'Nampa', state: 'ID', slug: '/credit-repair-nampa' },
+  { city: 'Caldwell', state: 'ID', slug: '/credit-repair-caldwell' },
+  { city: 'Idaho Falls', state: 'ID', slug: '/credit-repair-idaho-falls' },
+  { city: 'Twin Falls', state: 'ID', slug: '/credit-repair-twin-falls' },
+  { city: 'Pocatello', state: 'ID', slug: '/credit-repair-pocatello' },
+];
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [resourcesDropdownOpen, setResourcesDropdownOpen] = useState(false);
+  const [locationsDropdownOpen, setLocationsDropdownOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const { lang, setLang, t } = useTranslation();
-  
-  // Refs for dropdown timers
+  const { openFreeTrial } = useLeadCapture();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const aboutTimerRef = useRef(null);
   const resourcesTimerRef = useRef(null);
+  const locationsTimerRef = useRef(null);
 
-  // Cleanup timers on unmount
+  // Close mobile menu and scroll to top on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   useEffect(() => {
     return () => {
       if (aboutTimerRef.current) clearTimeout(aboutTimerRef.current);
       if (resourcesTimerRef.current) clearTimeout(resourcesTimerRef.current);
+      if (locationsTimerRef.current) clearTimeout(locationsTimerRef.current);
     };
   }, []);
 
-  const handleAboutEnter = () => {
-    if (aboutTimerRef.current) clearTimeout(aboutTimerRef.current);
-    setAboutDropdownOpen(true);
+  const handleAboutEnter = () => { if (aboutTimerRef.current) clearTimeout(aboutTimerRef.current); setAboutDropdownOpen(true); };
+  const handleAboutLeave = () => { aboutTimerRef.current = setTimeout(() => setAboutDropdownOpen(false), 300); };
+  const handleResourcesEnter = () => { if (resourcesTimerRef.current) clearTimeout(resourcesTimerRef.current); setResourcesDropdownOpen(true); };
+  const handleResourcesLeave = () => { resourcesTimerRef.current = setTimeout(() => setResourcesDropdownOpen(false), 300); };
+  const handleLocationsEnter = () => { if (locationsTimerRef.current) clearTimeout(locationsTimerRef.current); setLocationsDropdownOpen(true); };
+  const handleLocationsLeave = () => { locationsTimerRef.current = setTimeout(() => setLocationsDropdownOpen(false), 300); };
+
+  // Mobile nav helper — closes menu, scrolls to top
+  const mobileNav = (to) => (e) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    navigate(to);
+    window.scrollTo(0, 0);
   };
 
-  const handleAboutLeave = () => {
-    aboutTimerRef.current = setTimeout(() => {
-      setAboutDropdownOpen(false);
-    }, 300);
-  };
-
-  const handleResourcesEnter = () => {
-    if (resourcesTimerRef.current) clearTimeout(resourcesTimerRef.current);
-    setResourcesDropdownOpen(true);
-  };
-
-  const handleResourcesLeave = () => {
-    resourcesTimerRef.current = setTimeout(() => {
-      setResourcesDropdownOpen(false);
-    }, 300);
+  // Desktop nav helper — closes dropdowns
+  const desktopNav = () => {
+    setAboutDropdownOpen(false);
+    setResourcesDropdownOpen(false);
+    setLocationsDropdownOpen(false);
   };
 
   return (
@@ -50,18 +74,21 @@ const Header = () => {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-cinzel font-bold text-primary-blue">
-              Credlocity
-            </div>
+          <Link to="/" className="flex items-center" onClick={() => window.scrollTo(0, 0)}>
+            <img
+              src="/logo.png"
+              alt="Credlocity"
+              className="h-10 md:h-12 w-auto"
+              data-testid="header-logo"
+            />
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-6">
-            <Link to="/" className="text-gray-700 hover:text-primary-blue font-medium py-2">
+            <Link to="/" className="text-gray-700 hover:text-primary-blue font-medium py-2" onClick={() => window.scrollTo(0, 0)}>
               {t('site.home')}
             </Link>
-            <Link to="/pricing" className="text-gray-700 hover:text-primary-blue font-medium py-2">
+            <Link to="/pricing" className="text-gray-700 hover:text-primary-blue font-medium py-2" onClick={() => window.scrollTo(0, 0)}>
               {t('site.plans_pricing')}
             </Link>
             
@@ -71,32 +98,35 @@ const Header = () => {
               onMouseEnter={handleAboutEnter}
               onMouseLeave={handleAboutLeave}
             >
-              <button className="flex items-center space-x-1 text-gray-700 hover:text-primary-blue font-medium py-2">
+              <Link
+                to="/about-us"
+                className="flex items-center space-x-1 text-gray-700 hover:text-primary-blue font-medium py-2"
+                onClick={() => { desktopNav(); window.scrollTo(0, 0); }}
+                data-testid="header-about-us-link"
+              >
                 <span>{t('site.about_us')}</span>
                 <ChevronDown className="w-4 h-4" />
-              </button>
+              </Link>
               
               {aboutDropdownOpen && (
-                <div 
-                  className="absolute top-full left-0 w-64 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50"
-                >
-                  <Link to="/why-us" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
+                <div className="absolute top-full left-0 w-64 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50">
+                  <Link to="/about-credlocity" onClick={desktopNav} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors font-medium" data-testid="dropdown-about-credlocity">
+                    About Credlocity
+                  </Link>
+                  <Link to="/why-us" onClick={desktopNav} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors" data-testid="dropdown-why-us">
                     {t('site.why_us')}
                   </Link>
-                  <Link to="/30-day-free-trial" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
+                  <Link to="/30-day-free-trial" onClick={desktopNav} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors" data-testid="dropdown-free-trial">
                     {t('site.free_trial')}
                   </Link>
-                  <Link to="/collection-removal" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    {t('site.collection_removal')}
+                  <Link to="/success-stories" onClick={desktopNav} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
+                    Success Stories
                   </Link>
-                  <Link to="/late-payment-removal" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    {t('site.late_payment_removal')}
+                  <Link to="/team" onClick={desktopNav} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
+                    {t('site.our_team')}
                   </Link>
-                  <Link to="/fraud-removal" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    {t('site.fraud_removal')}
-                  </Link>
-                  <Link to="/human-trafficking-credit-block" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    {t('site.human_trafficking_block')}
+                  <Link to="/team/joeziel-joey-vazquez-davila" onClick={desktopNav} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors" data-testid="dropdown-meet-founder">
+                    Meet Our Founder
                   </Link>
                 </div>
               )}
@@ -114,35 +144,24 @@ const Header = () => {
               </button>
               
               {resourcesDropdownOpen && (
-                <div 
-                  className="absolute top-full left-0 w-64 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50"
-                >
-                  <Link to="/how-it-works" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
+                <div className="absolute top-full left-0 w-64 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50">
+                  <Link to="/how-it-works" onClick={desktopNav} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
                     {t('site.how_it_works')}
                   </Link>
-                  <Link to="/faq" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
+                  <Link to="/faqs" onClick={desktopNav} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
                     {t('site.faqs')}
                   </Link>
-                  <Link to="/blog" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
+                  <Link to="/blog" onClick={desktopNav} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
                     {t('site.blog')}
                   </Link>
-                  <Link to="/team" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    {t('site.our_team')}
-                  </Link>
-                  <Link to="/faqs" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    {t('site.faqs')}
-                  </Link>
-                  <Link to="/credit-scores" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
+                  <Link to="/credit-repair-laws" onClick={desktopNav} className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors" data-testid="dropdown-education-guide">
                     {t('site.educational_guides')}
-                  </Link>
-                  <Link to="/credit-repair-scams" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary-blue transition-colors">
-                    {t('site.credit_repair_scams')}
                   </Link>
                 </div>
               )}
             </div>
 
-            <Link to="/credit-tracker-app" className="text-gray-700 hover:text-primary-blue font-medium py-2">
+            <Link to="/credit-tracker-app" className="text-gray-700 hover:text-primary-blue font-medium py-2" onClick={() => window.scrollTo(0, 0)}>
               {t('site.credit_tracker')}
             </Link>
           </div>
@@ -181,17 +200,11 @@ const Header = () => {
               <Link to="/admin/login">{t('site.login')}</Link>
             </Button>
             <Button
-              asChild
-              className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+              className="bg-secondary-green hover:bg-secondary-green/90 text-white"
               data-testid="header-start-trial-btn"
+              onClick={openFreeTrial}
             >
-              <a 
-                href="https://credlocity.scorexer.com/portal-signUp/signup.jsp?id=a2dLYWJBMVhuOWRoMlB2cyt5MFVtUT09"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t('site.start_free_trial')}
-              </a>
+              {t('site.start_free_trial')}
             </Button>
           </div>
 
@@ -200,7 +213,6 @@ const Header = () => {
             className="lg:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="mobile-menu-toggle"
-            aria-label="Toggle mobile menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -208,77 +220,67 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="lg:hidden mt-4 pb-4 border-t border-gray-100" data-testid="mobile-menu">
+          <div className="lg:hidden mt-4 pb-4 border-t border-gray-100 max-h-[80vh] overflow-y-auto" data-testid="mobile-menu">
             <div className="flex flex-col space-y-4 mt-4">
-              <Link to="/" className="text-gray-700 hover:text-primary-blue font-medium">
+              <a href="/" onClick={mobileNav('/')} className="text-gray-700 hover:text-primary-blue font-medium">
                 {t('site.home')}
-              </Link>
-              <Link to="/pricing" className="text-gray-700 hover:text-primary-blue font-medium">
+              </a>
+              <a href="/pricing" onClick={mobileNav('/pricing')} className="text-gray-700 hover:text-primary-blue font-medium">
                 {t('site.plans_pricing')}
-              </Link>
+              </a>
               
               {/* About Us Mobile */}
               <div className="space-y-2">
-                <div className="font-semibold text-gray-900">{t('site.about_us')}</div>
-                <Link to="/why-us" className="block pl-4 text-gray-700 hover:text-primary-blue">
+                <a href="/about-us" onClick={mobileNav('/about-us')} className="font-semibold text-gray-900 hover:text-primary-blue" data-testid="mobile-about-us-link">
+                  {t('site.about_us')}
+                </a>
+                <a href="/about-credlocity" onClick={mobileNav('/about-credlocity')} className="block pl-4 text-gray-700 hover:text-primary-blue">
+                  About Credlocity
+                </a>
+                <a href="/why-us" onClick={mobileNav('/why-us')} className="block pl-4 text-gray-700 hover:text-primary-blue">
                   {t('site.why_us')}
-                </Link>
-                <Link to="/30-day-free-trial" className="block pl-4 text-gray-700 hover:text-primary-blue">
+                </a>
+                <a href="/30-day-free-trial" onClick={mobileNav('/30-day-free-trial')} className="block pl-4 text-gray-700 hover:text-primary-blue">
                   {t('site.free_trial')}
-                </Link>
-                <Link to="/collection-removal" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  {t('site.collection_removal')}
-                </Link>
-                <Link to="/late-payment-removal" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  {t('site.late_payment_removal')}
-                </Link>
-                <Link to="/fraud-removal" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  {t('site.fraud_removal')}
-                </Link>
-                <Link to="/human-trafficking-credit-block" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  {t('site.human_trafficking_block')}
-                </Link>
+                </a>
+                <a href="/success-stories" onClick={mobileNav('/success-stories')} className="block pl-4 text-gray-700 hover:text-primary-blue">
+                  Success Stories
+                </a>
+                <a href="/team" onClick={mobileNav('/team')} className="block pl-4 text-gray-700 hover:text-primary-blue">
+                  {t('site.our_team')}
+                </a>
+                <a href="/team/joeziel-joey-vazquez-davila" onClick={mobileNav('/team/joeziel-joey-vazquez-davila')} className="block pl-4 text-gray-700 hover:text-primary-blue">
+                  Meet Our Founder
+                </a>
               </div>
 
               {/* Resources Mobile */}
               <div className="space-y-2">
                 <div className="font-semibold text-gray-900">{t('site.resources')}</div>
-                <Link to="/how-it-works" className="block pl-4 text-gray-700 hover:text-primary-blue">
+                <a href="/how-it-works" onClick={mobileNav('/how-it-works')} className="block pl-4 text-gray-700 hover:text-primary-blue">
                   {t('site.how_it_works')}
-                </Link>
-                <Link to="/faqs" className="block pl-4 text-gray-700 hover:text-primary-blue">
+                </a>
+                <a href="/faqs" onClick={mobileNav('/faqs')} className="block pl-4 text-gray-700 hover:text-primary-blue">
                   {t('site.faqs')}
-                </Link>
-                <Link to="/blog" className="block pl-4 text-gray-700 hover:text-primary-blue">
+                </a>
+                <a href="/blog" onClick={mobileNav('/blog')} className="block pl-4 text-gray-700 hover:text-primary-blue">
                   {t('site.blog')}
-                </Link>
-                <Link to="/team" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  {t('site.our_team')}
-                </Link>
-                <Link to="/credit-scores" className="block pl-4 text-gray-700 hover:text-primary-blue">
+                </a>
+                <a href="/credit-repair-laws" onClick={mobileNav('/credit-repair-laws')} className="block pl-4 text-gray-700 hover:text-primary-blue">
                   {t('site.educational_guides')}
-                </Link>
-                <Link to="/credit-repair-scams" className="block pl-4 text-gray-700 hover:text-primary-blue">
-                  {t('site.credit_repair_scams')}
-                </Link>
+                </a>
               </div>
 
-              <Link to="/credit-tracker-app" className="text-gray-700 hover:text-primary-blue font-medium">
+              <a href="/credit-tracker-app" onClick={mobileNav('/credit-tracker-app')} className="text-gray-700 hover:text-primary-blue font-medium">
                 {t('site.credit_tracker')}
-              </Link>
+              </a>
               
               <div className="flex flex-col space-y-2 pt-4 border-t border-gray-100">
-                <Button variant="outline" asChild className="w-full">
+                <Button variant="outline" asChild className="w-full" onClick={() => setMobileMenuOpen(false)}>
                   <Link to="/admin/login">{t('site.login')}</Link>
                 </Button>
-                <Button asChild className="w-full bg-secondary-green hover:bg-secondary-green/90">
-                  <a 
-                    href="https://credlocity.scorexer.com/portal-signUp/signup.jsp?id=a2dLYWJBMVhuOWRoMlB2cyt5MFVtUT09"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {t('site.start_free_trial')}
-                  </a>
+                <Button className="w-full bg-secondary-green hover:bg-secondary-green/90" onClick={() => { setMobileMenuOpen(false); openFreeTrial(); }}>
+                  {t('site.start_free_trial')}
                 </Button>
               </div>
             </div>

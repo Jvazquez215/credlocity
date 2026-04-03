@@ -155,6 +155,11 @@ class BlogPost(BaseModel):
     related_press_releases: List[str] = []  # Press Release IDs for interlinking
     related_lawsuits: List[str] = []  # Lawsuit IDs for interlinking
     
+    # Series Management
+    series_id: Optional[str] = None  # UUID of the series this post belongs to
+    series_name: Optional[str] = None  # Name of the series (e.g., "Credit Repair Scams Exposed")
+    series_order: Optional[int] = None  # Order within the series (1, 2, 3...)
+    
     # Analytics (Basic tracking)
     view_count: int = 0
     
@@ -235,6 +240,9 @@ class BlogPostCreate(BaseModel):
     related_education_hub: bool = False  # Link to Education Hub
     related_press_releases: List[str] = []
     related_lawsuits: List[str] = []
+    series_id: Optional[str] = None
+    series_name: Optional[str] = None
+    series_order: Optional[int] = None
     updates: List[dict] = []  # Updates and corrections
     disclosures: dict = {}
     schemas: dict = {}
@@ -272,6 +280,9 @@ class BlogPostUpdate(BaseModel):
     related_education_hub: Optional[bool] = None
     related_press_releases: Optional[List[str]] = None
     related_lawsuits: Optional[List[str]] = None
+    series_id: Optional[str] = None
+    series_name: Optional[str] = None
+    series_order: Optional[int] = None
     updates: Optional[List[dict]] = None  # Updates and corrections
     disclosures: Optional[dict] = None  # Disclosure management
     schemas: Optional[dict] = None  # Schema.org management

@@ -8613,6 +8613,41 @@ from esign_api import esign_router, set_db as set_esign_db
 set_esign_db(db)
 app.include_router(esign_router, tags=["E-Signature"])
 
+# Include Partners Hub router
+from partners_hub_api import router as partners_hub_router
+app.include_router(partners_hub_router, tags=["Partners Hub"])
+
+# Include SEO Metadata router
+from seo_metadata_api import router as seo_router, set_db as set_seo_db, seed_seo_metadata
+set_seo_db(db)
+app.include_router(seo_router, tags=["SEO Metadata"])
+
+# Include Middleware module
+from middleware import set_db as set_middleware_db
+set_middleware_db(db)
+
+# Include CRO Portal router
+from cro_api import cro_router
+app.include_router(cro_router, tags=["CRO Portal"])
+
+# Include Promo Code router
+from promo_api import promo_router
+app.include_router(promo_router, tags=["Promo Codes"])
+
+# Include Email Subscriber router
+from subscriber_api import subscriber_router
+app.include_router(subscriber_router, tags=["Email Subscribers"])
+
+# Include Social Media router
+from social_media_api import social_media_router, set_db as set_social_media_db
+set_social_media_db(db)
+app.include_router(social_media_router, prefix="/api", tags=["Social Media"])
+
+# Include School router
+from school_api import school_router, set_db as set_school_db
+set_school_db(db)
+app.include_router(school_router, prefix="/api", tags=["School"])
+
 
 # ==================== SEED PARTNER USERS ====================
 async def seed_partner_users():
@@ -8934,6 +8969,146 @@ def _generate_agreement_pdf(agreement):
     return buffer
 
 
+# Include the Live Authorize.net Payment Gateway router
+from authorizenet_api import authorizenet_router
+app.include_router(authorizenet_router)
+
+# Include Payment Gateway Settings router
+from payment_gateway_settings_api import gateway_settings_router
+app.include_router(gateway_settings_router)
+
+# Include Authorize.net Gateway Routes (live charge, auth, capture, refund, void)
+from authorizenet_routes import router as gateway_live_router
+from authorizenet_routes import set_db as set_gateway_db
+set_gateway_db(db)
+app.include_router(gateway_live_router)
+
+# Initialize centralized payment processor
+from payment_processor import set_db as set_payment_processor_db
+set_payment_processor_db(db)
+
+# Include the Corporate Documents router
+from corporate_docs_api import corporate_docs_router
+app.include_router(corporate_docs_router)
+
+# Include the Blog Import router
+from blog_import_api import blog_import_router, set_db as set_blog_import_db
+set_blog_import_db(db)
+app.include_router(blog_import_router)
+
+# Include the OpenClaw AI Bot router
+from openclaw_api import openclaw_router, set_db as set_openclaw_db
+set_openclaw_db(db)
+app.include_router(openclaw_router)
+
+# Include the E-Book router
+from ebook_api import ebook_router, set_db as set_ebook_db
+set_ebook_db(db)
+app.include_router(ebook_router)
+
+# Include the Outsourcing Portal router
+from outsourcing_portal_api import portal_router, set_db as set_portal_db
+set_portal_db(db)
+app.include_router(portal_router)
+
+# Include Collections Letter Generator router
+from collections_letter_api import collections_letter_router, set_db as set_collections_letter_db
+set_collections_letter_db(db)
+app.include_router(collections_letter_router)
+
+# Include Audit Tracking router
+from audit_api import audit_router, set_db as set_audit_db
+set_audit_db(db)
+app.include_router(audit_router)
+
+# Include Credit Builder router
+from credit_builder_api import credit_builder_router, set_db as set_credit_builder_db, seed_credit_builder_products
+set_credit_builder_db(db)
+app.include_router(credit_builder_router)
+
+# Credit Reporting Dashboard
+from credit_reporting_api import credit_reporting_router, set_db as set_credit_reporting_db
+set_credit_reporting_db(db)
+app.include_router(credit_reporting_router, prefix="/api")
+
+# Reports
+from reports_api import reports_router, set_db as set_reports_db
+set_reports_db(db)
+app.include_router(reports_router, prefix="/api")
+
+# Affiliates
+from affiliate_api import affiliate_router, set_db as set_affiliate_db
+from security_api import security_router as security_pwd_router
+from lawsuit_response_api import lawsuit_response_router
+from seo_api import seo_router as seo_pages_router
+set_affiliate_db(db)
+app.include_router(affiliate_router, prefix="/api")
+app.include_router(security_pwd_router, prefix="/api")
+app.include_router(lawsuit_response_router, prefix="/api")
+app.include_router(seo_pages_router, prefix="/api")
+
+# Include CPR Merger CRM router
+from cpr_merger_api import cpr_router, set_db as set_cpr_db, seed_cpr_data, seed_elisabeth_data, migrate_client_monthly_fields
+set_cpr_db(db)
+app.include_router(cpr_router)
+
+# CPR Partners Hub router
+from cpr_partners_api import partners_router as cpr_partners_router, set_db as set_cpr_partners_db, seed_partner_accounts
+set_cpr_partners_db(db)
+app.include_router(cpr_partners_router)
+
+# Merger Workflow router (task management, verification, overview)
+from merger_workflow_api import merger_router, set_db as set_merger_workflow_db
+set_merger_workflow_db(db)
+app.include_router(merger_router)
+
+# Bug Tickets router
+from bug_tickets_api import tickets_router, set_db as set_tickets_db
+set_tickets_db(db)
+app.include_router(tickets_router)
+
+# Serve uploaded merger docs and ticket screenshots
+import os as _os
+_uploads_path = _os.path.join(_os.path.dirname(__file__), "uploads")
+if _os.path.exists(_uploads_path):
+    app.mount("/api/cpr/uploads", StaticFiles(directory=_uploads_path), name="merger_uploads")
+    app.mount("/api/tickets/uploads", StaticFiles(directory=_os.path.join(_uploads_path, "bug_tickets")), name="ticket_uploads")
+
+# Partner PIN Auth router
+from partner_pin_api import pin_router, set_db as set_pin_db
+set_pin_db(db)
+app.include_router(pin_router)
+
+# Free Downloadable Letters
+from letters_api import letters_router, set_db as set_letters_db
+set_letters_db(db)
+app.include_router(letters_router)
+
+# Letter Templates (SEO pages with PDF generation)
+from letter_templates_api import letter_templates_router, set_db as set_letter_templates_db
+set_letter_templates_db(db)
+app.include_router(letter_templates_router)
+
+# Complaint Letters (Scam Checker integration)
+from complaint_letters_api import complaint_letters_router, set_db as set_complaint_db
+set_complaint_db(db)
+app.include_router(complaint_letters_router)
+
+# Locations CMS
+from locations_api import locations_router, set_db as set_locations_db
+set_locations_db(db)
+app.include_router(locations_router)
+
+# Agreements PDF System
+from agreements_api import agreements_router, set_db as set_agreements_db
+set_agreements_db(db)
+app.include_router(agreements_router)
+
+# Leads System
+from leads_api import leads_router, set_db as set_leads_db
+set_leads_db(db)
+app.include_router(leads_router)
+
 # Seed default data on startup
 @app.on_event("startup")
 async def startup_seed():
@@ -8944,6 +9119,30 @@ async def startup_seed():
         await seed_partner_users()
         await seed_documentation()
         await seed_cms_mastery_training()
+        await seed_seo_metadata()
+        await seed_credit_builder_products()
+        await seed_cpr_data()
+        await seed_elisabeth_data()
+        await seed_partner_accounts()
+        await migrate_client_monthly_fields()
+        # Seed school courses
+        from school_seed import seed_courses
+        await seed_courses(db)
+        # Initialize object storage
+        try:
+            from object_storage import init_storage
+            init_storage()
+        except Exception as e:
+            print(f"[WARNING] Object storage init failed: {e}")
+        # Start email scheduler for live class reminders
+        try:
+            from email_scheduler import set_db as set_email_db, start_scheduler
+            import asyncio
+            set_email_db(db)
+            asyncio.create_task(start_scheduler())
+            print("[INFO] Email reminder scheduler started")
+        except Exception as e:
+            print(f"[WARNING] Email scheduler init failed: {e}")
     except Exception as e:
         print(f"Warning: Startup seed failed (non-fatal): {e}")
 

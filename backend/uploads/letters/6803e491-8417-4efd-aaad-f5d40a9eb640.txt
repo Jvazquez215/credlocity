@@ -1,0 +1,49 @@
+[YOUR NAME]
+[YOUR ADDRESS]
+[CITY, STATE ZIP]
+[DATE]
+
+[CREDIT BUREAU NAME]
+[CREDIT BUREAU ADDRESS]
+
+RE: Identity Theft Victim - Request to Block Fraudulent Information
+FCRA Section 605B (15 U.S.C. § 1681c-2)
+
+Dear Sir/Madam,
+
+I am a victim of identity theft and I am writing to request that you block the following fraudulent information from my credit report pursuant to Section 605B of the Fair Credit Reporting Act.
+
+FRAUDULENT ACCOUNT(S):
+1. Account Name: [CREDITOR]
+   Account Number: [NUMBER]
+   Type: [Credit Card / Loan / etc.]
+   Reason: This account was opened fraudulently without my knowledge or consent.
+
+2. [Additional fraudulent accounts as needed]
+
+FRAUDULENT INQUIRY(IES):
+1. Company: [COMPANY NAME]
+   Date: [DATE]
+   Reason: I did not authorize this inquiry.
+
+I am enclosing the following required documentation:
+
+1. FTC Identity Theft Report (complaint number: [NUMBER])
+2. Copy of police report (report number: [NUMBER])
+3. Copy of my government-issued photo ID
+4. Proof of my current address
+5. Identity Theft Affidavit
+
+Under FCRA Section 605B, you are required to:
+- Block the fraudulent information within 4 business days of receiving this request
+- Notify the furnishers of the fraudulent information
+- Provide me with confirmation that the information has been blocked
+
+Please send written confirmation of the blocked items within 5 business days.
+
+Sincerely,
+
+[YOUR SIGNATURE]
+[YOUR PRINTED NAME]
+
+Enclosures: As listed above

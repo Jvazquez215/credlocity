@@ -9128,12 +9128,9 @@ async def startup_seed():
         # Seed school courses
         from school_seed import seed_courses
         await seed_courses(db)
-        # Initialize object storage
-        try:
-            from object_storage import init_storage
-            init_storage()
-        except Exception as e:
-            print(f"[WARNING] Object storage init failed: {e}")
+        # Object storage disabled — was using Emergent's service, now using Cloudinary
+        # from object_storage import init_storage
+        # init_storage()
         # Start email scheduler for live class reminders
         try:
             from email_scheduler import set_db as set_email_db, start_scheduler

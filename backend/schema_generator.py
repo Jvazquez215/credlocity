@@ -429,3 +429,251 @@ def generate_pricing_schema(pricing_data: List[dict], site_settings: dict = None
     
     return schema
 
+
+
+# ============ MERGED FROM PART59 - SEO API SUPPORT ============
+"""
+Global Schema Generator
+Auto-generates JSON-LD structured data for every page with Credlocity business info.
+"""
+
+# ==================== COMPANY CONSTANTS ====================
+
+COMPANY = {
+    "name": "Credlocity Business Group LLC",
+    "alternateName": ["Credlocity", "Ficostar Credit Services"],
+    "foundingDate": "2008",
+    "description": "Professional credit repair services compliant with FCRA, CROA, and TSR. Hispanic-owned, Minority-owned, Women-owned, LGBTQAI+-owned business serving 79,000+ clients since 2008 across all 50 states.",
+    "url": "https://www.credlocity.com",
+    "telephone": "",
+    "email": "admin@credlocity.com",
+    "priceRange": "$99.95 - $279.95/month",
+    "logo": "https://static.wixstatic.com/media/bed107_4cbc9d8e58b44e6f9a5a451be0a52b4a~mv2.png/v1/fill/w_170,h_172,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/bed107_4cbc9d8e58b44e6f9a5a451be0a52b4a~mv2.png",
+    "logoWidth": 170,
+    "logoHeight": 172,
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "1500 Chestnut Street, Suite 2",
+        "addressLocality": "Philadelphia",
+        "addressRegion": "PA",
+        "postalCode": "19102",
+        "addressCountry": "US"
+    },
+    "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 39.9519,
+        "longitude": -75.1656
+    },
+    "sameAs": [
+        "https://www.linkedin.com/company/credlocity/",
+        "https://x.com/credlocity",
+        "https://www.instagram.com/credlocity",
+        "https://www.facebook.com/Credlocity/",
+        "https://www.threads.com/@credlocity",
+        "https://bsky.app/profile/credlocity.bsky.social",
+        "https://www.youtube.com/@Credlocity",
+        "https://share.google/DPl9SYiffQsFVIV92"
+    ],
+    "keywords": "credit repair, credit repair services, FCRA, FDCPA, CROA, credit score improvement, dispute letters, credit report errors, debt collection, consumer protection"
+}
+
+AUTHOR = {
+    "name": "Joeziel Vazquez",
+    "alternateName": "Joeziel Joey Vazquez",
+    "jobTitle": "CEO & Board Certified Credit Consultant",
+    "url": "https://www.credlocity.com/credlocity-about-us-philadelphia-credit-repair-joeziel-vazquez",
+    "email": "admin@credlocity.com",
+    "telephone": "",
+    "image": "https://static.wixstatic.com/media/bed107_e06e7a7f49e94144b9ff72ad6634af9f~mv2.jpg/v1/fill/w_836,h_2048,al_c,q_85,enc_avif,quality_auto/bed107_e06e7a7f49e94144b9ff72ad6634af9f~mv2.jpg",
+    "imageWidth": 836,
+    "imageHeight": 2048,
+    "sameAs": [
+        "https://www.linkedin.com/in/mrcreditguru/",
+        "https://joezieljoeyvazquezdavila.link/"
+    ],
+    "description": "CEO and founder of Credlocity Business Group LLC with 17 years of experience in consumer credit and finance. Former victim of credit repair fraud by Lexington Law in 2008, which inspired him to establish Credlocity as an ethical alternative. Conducts investigative journalism since 2019 exposing credit repair fraud and advocating for consumer protection.",
+    "certifications": [
+        "Board Certified Credit Consultant (BCCC)",
+        "Certified Credit Score Consultant (CCSC)",
+        "Certified Credit Repair Specialist (CCRS)",
+        "FCRA Certified Professional"
+    ],
+    "knowsAbout": [
+        "Credit Repair", "Fair Credit Reporting Act (FCRA)", "Fair Debt Collection Practices Act (FDCPA)",
+        "Credit Repair Organizations Act (CROA)", "Consumer Protection Law", "Credit Score Optimization",
+        "Debt Collection Defense", "Identity Theft Recovery", "Metro 2 Compliance", "E-OSCAR Disputes"
+    ],
+    "awards": [
+        "79,000+ clients served since 2008",
+        "$3.8 million in unverified debt successfully removed",
+        "17 years in business (2008-2025)",
+        "Zero negative BBB reviews",
+        "5.0 star aggregate rating"
+    ],
+}
+
+PRICING = [
+    {"name": "Fraud Package", "price": "99.95", "description": "Entry-level credit repair with monthly consultations and budgeting."},
+    {"name": "Aggressive Package", "price": "179.95", "description": "Comprehensive credit repair with intensive dispute services, monthly consultations and budgeting. Most Popular."},
+    {"name": "Family Package", "price": "279.95", "description": "Multi-person credit repair covering family members with consultations and budgeting for all."},
+]
+
+IDAHO_OFFICE = {
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "964 W Idaho Ave",
+        "addressLocality": "Ontario",
+        "addressRegion": "OR",
+        "postalCode": "97914",
+        "addressCountry": "US"
+    },
+    "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 43.9757,
+        "longitude": -116.9629
+    },
+}
+
+OPENING_HOURS = [
+    {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:00", "closes": "18:00"},
+]
+
+
+def build_organization_schema():
+    return {
+        "@type": "Organization",
+        "name": COMPANY["name"],
+        "alternateName": COMPANY["alternateName"],
+        "url": COMPANY["url"],
+        "logo": {"@type": "ImageObject", "url": COMPANY["logo"], "width": COMPANY["logoWidth"], "height": COMPANY["logoHeight"]},
+        "image": {"@type": "ImageObject", "url": COMPANY["logo"], "width": COMPANY["logoWidth"], "height": COMPANY["logoHeight"]},
+        "telephone": COMPANY["telephone"],
+        "email": COMPANY["email"],
+        "address": COMPANY["address"],
+        "foundingDate": COMPANY["foundingDate"],
+        "sameAs": COMPANY["sameAs"],
+    }
+
+
+def build_local_business_schema(location_override=None):
+    address = location_override.get("address", COMPANY["address"]) if location_override else COMPANY["address"]
+    geo = location_override.get("geo", COMPANY["geo"]) if location_override else COMPANY["geo"]
+    city_name = location_override.get("city", "") if location_override else ""
+    name = f"{COMPANY['name']} — {city_name}" if city_name else COMPANY["name"]
+    desc = location_override.get("description", COMPANY["description"]) if location_override else COMPANY["description"]
+    return {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": name,
+        "alternateName": COMPANY["alternateName"],
+        "description": desc,
+        "url": COMPANY["url"],
+        "logo": {"@type": "ImageObject", "url": COMPANY["logo"], "width": COMPANY["logoWidth"], "height": COMPANY["logoHeight"]},
+        "image": {"@type": "ImageObject", "url": COMPANY["logo"], "width": COMPANY["logoWidth"], "height": COMPANY["logoHeight"]},
+        "telephone": COMPANY["telephone"],
+        "email": COMPANY["email"],
+        "address": address,
+        "geo": geo,
+        "openingHoursSpecification": OPENING_HOURS,
+        "priceRange": COMPANY["priceRange"],
+        "founder": {"@type": "Person", "name": AUTHOR["name"], "jobTitle": AUTHOR["jobTitle"], "url": AUTHOR["url"]},
+        "foundingDate": COMPANY["foundingDate"],
+        "areaServed": [{"@type": "Country", "name": "United States"}],
+        "serviceArea": {"@type": "GeoCircle", "geoMidpoint": geo, "geoRadius": "5000 miles"},
+        "hasOfferCatalog": {
+            "@type": "OfferCatalog", "name": "Credit Repair Services",
+            "itemListElement": [{"@type": "Offer", "name": p["name"], "price": p["price"], "priceCurrency": "USD", "description": p["description"]} for p in PRICING]
+        },
+        "makesOffer": [
+            {"@type": "Offer", "name": "30-Day Free Trial", "description": "Try credit repair services free for 30 days."},
+            {"@type": "Offer", "name": "180-Day Money-Back Guarantee", "description": "Full refund if not satisfied within 180 days."},
+        ],
+        "aggregateRating": {"@type": "AggregateRating", "ratingValue": "5.0", "bestRating": "5", "worstRating": "1", "reviewCount": "79000"},
+        "sameAs": COMPANY["sameAs"],
+        "keywords": COMPANY["keywords"],
+    }
+
+
+def build_author_schema():
+    return {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": AUTHOR["name"],
+        "alternateName": AUTHOR["alternateName"],
+        "jobTitle": AUTHOR["jobTitle"],
+        "url": AUTHOR["url"],
+        "email": AUTHOR["email"],
+        "telephone": AUTHOR["telephone"],
+        "address": COMPANY["address"],
+        "image": {"@type": "ImageObject", "url": AUTHOR["image"], "width": AUTHOR["imageWidth"], "height": AUTHOR["imageHeight"]},
+        "sameAs": AUTHOR["sameAs"],
+        "worksFor": build_organization_schema(),
+        "hasCredential": [{"@type": "EducationalOccupationalCredential", "credentialCategory": "Professional Certification", "name": c} for c in AUTHOR["certifications"]],
+        "knowsAbout": AUTHOR["knowsAbout"],
+        "award": AUTHOR["awards"],
+        "description": AUTHOR["description"],
+    }
+
+
+def build_blog_posting_schema(post: dict):
+    from datetime import datetime, timezone
+    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S-05:00")
+    published = post.get("published_at") or post.get("created_at") or now_iso
+    modified = post.get("updated_at") or published
+    return {
+        "@context": "https://schema.org", "@type": "BlogPosting",
+        "headline": post.get("title", ""),
+        "author": build_author_schema(),
+        "publisher": build_organization_schema(),
+        "datePublished": published, "dateModified": modified,
+        "description": post.get("seo_description") or post.get("excerpt", ""),
+        "mainEntityOfPage": {"@type": "WebPage", "@id": f"{COMPANY['url']}/post/{post.get('slug', '')}"},
+        "image": {"@type": "ImageObject", "url": post.get("featured_image") or COMPANY["logo"], "width": 1200, "height": 630},
+        "wordCount": len((post.get("content") or "").split()),
+        "keywords": post.get("seo_keywords") or post.get("tags", []),
+        "articleSection": post.get("category", "Credit Repair"),
+        "about": [{"@type": "Thing", "name": t} for t in (post.get("tags") or ["Credit Repair"])[:5]],
+        "mentions": [
+            {"@type": "GovernmentOrganization", "name": "Consumer Financial Protection Bureau (CFPB)"},
+            {"@type": "GovernmentOrganization", "name": "Federal Trade Commission (FTC)"},
+        ],
+        "citation": [
+            {"@type": "WebPage", "url": f"{COMPANY['url']}/how-it-works", "name": "How Credit Repair Works"},
+            {"@type": "WebPage", "url": f"{COMPANY['url']}/pricing", "name": "Credit Repair Pricing"},
+        ],
+        "speakable": {"@type": "SpeakableSpecification", "cssSelector": ["h1", ".article-summary", ".faq-answer"]},
+    }
+
+
+def build_faq_schema(faqs: list):
+    return {
+        "@context": "https://schema.org", "@type": "FAQPage",
+        "mainEntity": [{"@type": "Question", "name": f["q"], "acceptedAnswer": {"@type": "Answer", "text": f["a"]}} for f in faqs]
+    }
+
+
+def build_breadcrumb_schema(items: list):
+    return {
+        "@context": "https://schema.org", "@type": "BreadcrumbList",
+        "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": item["name"], "item": item["url"]} for i, item in enumerate(items)]
+    }
+
+
+def generate_page_schemas(path: str, title: str = "", description: str = "", faqs: list = None, post: dict = None, location_override: dict = None):
+    """Generate all schemas for a page. Returns list of schema dicts."""
+    url = f"{COMPANY['url']}{path}"
+    schemas = [build_local_business_schema(location_override=location_override), build_author_schema()]
+    if post:
+        schemas.append(build_blog_posting_schema(post))
+    elif title:
+        schemas.append({"@context": "https://schema.org", "@type": "WebPage", "name": title, "description": description, "url": url, "publisher": build_organization_schema(),
+                         "speakable": {"@type": "SpeakableSpecification", "cssSelector": ["h1", "h2", ".faq-answer", "[data-speakable]"]}})
+    if faqs:
+        schemas.append(build_faq_schema(faqs))
+    breadcrumbs = [{"name": "Home", "url": COMPANY["url"]}]
+    parts = [p for p in path.split("/") if p]
+    for i, part in enumerate(parts):
+        breadcrumbs.append({"name": part.replace("-", " ").title(), "url": f"{COMPANY['url']}/{'/'.join(parts[:i+1])}"})
+    if len(breadcrumbs) > 1:
+        schemas.append(build_breadcrumb_schema(breadcrumbs))
+    return schemas

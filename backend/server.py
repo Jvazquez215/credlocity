@@ -84,6 +84,11 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Health check endpoint (Render checks this to verify service is alive)
+@api_router.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "credlocity-api"}
+
 # Media upload directory (fallback for local dev)
 MEDIA_DIR = ROOT_DIR / "media"
 MEDIA_DIR.mkdir(exist_ok=True)

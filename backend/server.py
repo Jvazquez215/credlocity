@@ -97,13 +97,22 @@ MEDIA_DIR.mkdir(exist_ok=True)
 app.mount("/media", StaticFiles(directory=str(MEDIA_DIR)), name="media")
 
 # Cloudinary configuration
-cloudinary.config(
-    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
-    secure=True
-)
-USE_CLOUDINARY = bool(os.getenv("CLOUDINARY_CLOUD_NAME") and os.getenv("CLOUDINARY_API_KEY") and os.getenv("CLOUDINARY_API_SECRET"))
+# Supports either CLOUDINARY_URL (preferred) or individual env vars
+if os.getenv("CLOUDINARY_URL"):
+    # CLOUDINARY_URL format: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+    cloudinary.config(secure=True)  # cloudinary lib auto-reads CLOUDINARY_URL
+    USE_CLOUDINARY = True
+elif os.getenv("CLOUDINARY_CLOUD_NAME") and os.getenv("CLOUDINARY_API_KEY") and os.getenv("CLOUDINARY_API_SECRET"):
+    cloudinary.config(
+        cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+        api_key=os.getenv("CLOUDINARY_API_KEY"),
+        api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+        secure=True
+    )
+    USE_CLOUDINARY = True
+else:
+    USE_CLOUDINARY = False
+    print("[WARNING] Cloudinary not configured — media uploads will use local storage (ephemeral on Render)")
 
 
 # ============ AUTH HELPER ============
